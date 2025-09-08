@@ -1,0 +1,35 @@
+{
+  "name": "wingtradebot",
+  "version": "5.0",
+  "description": "Automated trading bot for SimpleFX integration with TradingView webhooks",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "ts-node src/server.ts",
+    "build": "tsc",
+    "start": "pm2 start dist/server.js --name wingtradebot",
+    "stop": "pm2 stop wingtradebot",
+    "restart": "pm2 restart wingtradebot",
+    "logs": "pm2 logs wingtradebot"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "body-parser": "^1.20.2",
+    "axios": "^1.4.0",
+    "ws": "^8.13.0",
+    "sqlite3": "^5.1.6",
+    "winston": "^3.10.0",
+    "winston-daily-rotate-file": "^4.7.1",
+    "express-basic-auth": "^1.2.1",
+    "node-cron": "^3.0.2",
+    "lodash": "^4.17.21",
+    "async-mutex": "^0.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.4.5",
+    "@types/express": "^4.17.17",
+    "@types/ws": "^8.5.5",
+    "@types/lodash": "^4.14.195",
+    "typescript": "^5.1.6",
+    "ts-node": "^10.9.1"
+  }
+}
