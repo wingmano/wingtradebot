@@ -1,6 +1,10 @@
 # WingTradeBot
 
-TradingView webhook server that executes automated trades through SimpleFX API. Receives webhook signals from TradingView indicators and places trades with configurable risk management parameters.
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+Automated trading system that connects TradingView webhook signals to SimpleFX API execution. Built for reliable trade automation with comprehensive risk management and real-time monitoring.
 
 ## Features
 
@@ -12,11 +16,11 @@ TradingView webhook server that executes automated trades through SimpleFX API. 
 - **Database Logging**: SQLite database for trade history and account settings
 - **WebSocket Market Data**: Real-time price feeds for accurate trade execution
 
-## Dashboard Preview
+## Dashboard
 
 ![WingTradeBot Dashboard](docs/dashboard.png)
 
-*Real-time trading dashboard showing account status, active positions, trading controls, and performance metrics*
+Real-time interface for monitoring account status, active positions, and trade execution.
 
 ## Requirements
 
