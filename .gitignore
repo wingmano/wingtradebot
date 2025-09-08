@@ -103,6 +103,9 @@ temp/
 *.swo
 *~
 
+# AI Assistant configuration
+.kiro/
+
 # OS generated files
 .DS_Store
 .DS_Store?
