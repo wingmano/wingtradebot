@@ -12,6 +12,12 @@ TradingView webhook server that executes automated trades through SimpleFX API. 
 - **Database Logging**: SQLite database for trade history and account settings
 - **WebSocket Market Data**: Real-time price feeds for accurate trade execution
 
+## Dashboard Preview
+
+![WingTradeBot Dashboard](docs/dashboard.png)
+
+*Real-time trading dashboard showing account status, active positions, trading controls, and performance metrics*
+
 ## Requirements
 
 - Node.js 16+ and npm
