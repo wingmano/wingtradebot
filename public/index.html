@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WingTradeBot Status (New Version)</title>
+    <meta name="google" content="notranslate">
+    <script src="https://unpkg.com/react@17.0.2/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17.0.2/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/prop-types@15.7.2/prop-types.min.js" crossorigin></script>
+    <script src="https://unpkg.com/recharts@2.6.2/umd/Recharts.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone@7.20.15/babel.min.js" crossorigin></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="https://unpkg.com/lightweight-charts@3.8.0/dist/lightweight-charts.standalone.production.js"></script>
+    <style>
+        .account-button {
+            @apply px-4 py-3 text-sm font-bold text-gray-700 transition-colors duration-150;
+            border: 2px solid #d1d5db;
+            border-radius: 0.5rem;
+            background-color: #f3f4f6;
+            width: 180px;
+            height: 25px; /* Reduced height */
+        }
+        .account-button.active {
+            @apply text-white;
+            background-color: #3b82f6;
+            border-color: #2563eb;
+        }
+        .account-button:not(.active):hover {
+            background-color: #e5e7eb;
+            border-color: #9ca3af;
+        }
+        .tab-button {
+            @apply px-4 py-2 text-sm font-bold text-gray-700 transition-colors duration-150;
+            border: 2px solid #d1d5db;
+            border-radius: 0.5rem;
+            background-color: #f3f4f6;
+            width: 200px;
+        }
+        .tab-button.active {
+            @apply text-white;
+            background-color: #3b82f6;
+            border-color: #2563eb;
+        }
+        .tab-button:not(.active):hover {
+            background-color: #e5e7eb;
+            border-color: #9ca3af;
+        }
+        .data-card {
+            @apply bg-white rounded-lg shadow-sm border border-gray-200 p-4 pb-0;
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        .data-table {
+            @apply w-full border-collapse;
+            border: 1px solid #e5e7eb;
+        }
+        .data-table tr {
+            @apply border-b border-gray-200;
+        }
+        .data-table td {
+            @apply py-3 px-3;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .data-table tr:not(:last-child) {
+            @apply mb-2;
+        }
+        .data-label {
+            @apply text-sm text-gray-600 font-medium text-left whitespace-nowrap;
+            width: 50%;
+        }
+        .data-value {
+            @apply text-sm font-mono text-right text-gray-900 whitespace-nowrap;
+            width: 50%;
+        }
+        .status-pill {
+            @apply px-3 py-1 rounded-md text-sm font-medium shadow-sm;
+            width: 160px;
+            text-align: center;
+        }
+        .overview-section {
+            @apply space-y-2;
+        }
+        /* New styles for improved logs section */
+        .logs-container {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 10px;
+            height: 100%;
+        }
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        .log-entry.error { background-color: #ffe6e6; color: #d32f2f; }
+        .log-entry.warning { background-color: #fff3e0; color: #f57c00; }
+        .log-entry.success { background-color: #e8f5e9; color: #388e3c; }
+        .log-timestamp {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .log-message {
+            word-break: break-word;
+        }
+        .truncate {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+            display: inline-block;
+        }
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            background-color: #ffffff;
+            z-index: 10;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .resizable-logs {
+            width: 100%;
+            min-height: 150px;
+        }
+        .react-resizable-handle {
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2IDYiIHN0eWxlPSJiYWNrZ3JvdW5kLWNvbG9yOiNmZmZmZmYwMCIgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSI2cHgiIGhlaWdodD0iNnB4Ij48ZyBvcGFjaXR5PSIwLjMwMiI+PHBhdGggZD0iTSA2IDYgTCAwIDYgTCAwIDQuMiBMIDQgNC4yIEwgNC4yIDQuMiBMIDQuMiAwIEwgNiAwIEwgNiA2IEwgNiA2IFoiIGZpbGw9IiMwMDAwMDAiLz48L2c+PC9zdmc+');
+            background-position: bottom right;
+            background-repeat: no-repeat;
+            background-origin: content-box;
+            box-sizing: border-box;
+            cursor: se-resize;
+        }
+        .account-buttons-container {
+            margin-bottom: 1.5rem; /* Add space below the buttons */
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, useCallback, useRef } = React;
+        const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } = Recharts;
+
+        function formatDateToUTC(date) {
+            return new Date(date).toISOString().split('T')[0];
+        }
+
+        function formatDate(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        function DateFilter({ onFilterChange }) {
+            const [startDate, setStartDate] = useState(() => {
+                const date = new Date();
+                date.setDate(date.getDate() - 6); // 7 days ago
+                return formatDate(date);
+            });
+            const [endDate, setEndDate] = useState(() => formatDate(new Date()));
+
+            useEffect(() => {
+                onFilterChange(startDate, endDate);
+            }, []);
+
+            const handleFilter = () => {
+                onFilterChange(startDate, endDate);
+            };
+
+            return (
+                React.createElement('div', { className: 'flex items-center space-x-2' },
+                    React.createElement('input', {
+                        type: 'date',
+                        value: startDate,
+                        onChange: (e) => setStartDate(e.target.value),
+                        className: 'border rounded px-2 py-1'
+                    }),
+                    React.createElement('span', null, 'to'),
+                    React.createElement('input', {
+                        type: 'date',
+                        value: endDate,
+                        onChange: (e) => setEndDate(e.target.value),
+                        className: 'border rounded px-2 py-1'
+                    }),
+                    React.createElement('button', { onClick: handleFilter, className: 'bg-blue-500 text-white px-4 py-1 rounded' }, 'Filter')
+                )
+            );
+        }
+
+        function Table({ data, columns, tabName, selectedAccount }) {
+            const [sortConfig, setSortConfig] = useState({ key: 'id', direction: 'descending' });
+
+            const sortedData = useMemo(() => {
+                let sortableData = [...data];
+                if (sortConfig.key !== null) {
+                    sortableData.sort((a, b) => {
+                        if (a[sortConfig.key] < b[sortConfig.key]) {
+                            return sortConfig.direction === 'ascending' ? -1 : 1;
+                        }
+                        if (a[sortConfig.key] > b[sortConfig.key]) {
+                            return sortConfig.direction === 'ascending' ? 1 : -1;
+                        }
+                        return 0;
+                    });
+                }
+                return sortableData;
+            }, [data, sortConfig]);
+
+            const requestSort = (key) => {
+                let direction = 'ascending';
+                if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+                    direction = 'descending';
+                }
+                setSortConfig({ key, direction });
+            };
+
+            return (
+                React.createElement('div', { className: 'overflow-x-auto' },
+                    React.createElement('div', { className: 'flex justify-between items-center mb-2' },
+                        React.createElement('h3', { className: 'text-lg font-semibold' }, tabName),
+                        React.createElement('div', { className: 'flex gap-2' },
+                            React.createElement('button', {
+                                onClick: () => exportData(data, `${tabName.replace(' ', '_')}.csv`, 'csv', selectedAccount),
+                                className: 'px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600'
+                            }, 'Export CSV'),
+                            React.createElement('button', {
+                                onClick: () => exportData(data, `${tabName.replace(' ', '_')}.xlsx`, 'xlsx', selectedAccount),
+                                className: 'px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600'
+                            }, 'Export Excel')
+                        )
+                    ),
+                    React.createElement('table', { className: 'min-w-full divide-y divide-gray-200 data-table' },
+                        React.createElement('thead', { className: 'bg-gray-50' },
+                            React.createElement('tr', null,
+                                columns.map((column) => (
+                                    React.createElement('th', {
+                                        key: column.key,
+                                        onClick: () => requestSort(column.key),
+                                        className: 'px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
+                                    },
+                                        column.label,
+                                        sortConfig.key === column.key && (
+                                            React.createElement('span', null, sortConfig.direction === 'ascending' ? ' 🔼' : ' 🔽')
+                                        )
+                                    )
+                                ))
+                            )
+                        ),
+                        React.createElement('tbody', { className: 'bg-white divide-y divide-gray-200' },
+                            sortedData.map((row, rowIndex) => (
+                                React.createElement(
+                                    'tr',
+                                    {
+                                        key: rowIndex,
+                                        className: 
+                                            Math.abs(row.closePrice - row.stopLoss) <= 0.00005
+                                                ? 'bg-red-100'
+                                                : Math.abs(row.closePrice - row.takeProfit) <= 0.00005
+                                                ? 'bg-green-100'
+                                                : '',
+                                    },
+                                    columns.map((column) =>
+                                        React.createElement(
+                                            'td',
+                                            { key: column.key, className: 'px-3 py-2 whitespace-nowrap text-sm' },
+                                            column.key === 'maxSize'
+                                                ? row.maxSize || 'N/A'
+                                                : column.render
+                                                ? column.render(row)
+                                                : row[column.key] != null
+                                                ? row[column.key]
+                                                : 'N/A'
+                                        )
+                                    )
+                                )
+                            ))
+                        )
+                    )
+                )
+            );
+        }
+
+        function DailyPnLChart({ data }) {
+            const sortedData = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
+            const startDate = sortedData[0]?.date;
+            const endDate = sortedData[sortedData.length - 1]?.date;
+
+            return (
+                React.createElement('div', { className: 'h-48 w-full' }, 
+                    React.createElement(ResponsiveContainer, { width: '100%', height: '100%' },
+                        React.createElement(BarChart, { data: sortedData, margin: { top: 10, right: 10, left: 40, bottom: 0 } },
+                            React.createElement(CartesianGrid, { strokeDasharray: '3 3', vertical: false, stroke: '#f0f0f0' }),
+                            React.createElement(XAxis, {
+                                dataKey: 'date',
+                                tickFormatter: (date) => new Date(date).toUTCString().split(' ').slice(1, 4).join(' '),
+                                domain: [startDate, endDate],
+                                type: 'category',
+                                stroke: '#6b7280',
+                                fontSize: 12
+                            }),
+                            React.createElement(YAxis, {
+                                stroke: '#6b7280',
+                                fontSize: 12,
+                                tickFormatter: (value) => `${value > 0 ? '+' : ''}${value.toFixed(2)}`
+                            }),
+                            React.createElement(Tooltip, {
+                                formatter: (value) => [`$${value.toFixed(2)}`, 'P&L'],
+                                labelFormatter: (date) => new Date(date).toUTCString().split(' ').slice(0, 4).join(' '),
+                                contentStyle: {
+                                    backgroundColor: '#fff',
+                                    border: '1px solid #e5e7eb',
+                                    borderRadius: '4px',
+                                    padding: '8px'
+                                }
+                            }),
+                            React.createElement(Bar, {
+                                dataKey: 'pnl',
+                                fill: (entry) => entry.fill // Use the precomputed color
+                            })
+                        )
+                    )
+                )
+            );
+        }
+
+        function LogsSection({ logs, recentLogs, selectedAccount }) {
+            // Set autoScroll to true by default
+            const [autoScroll, setAutoScroll] = useState(true);
+            const [visibleLogs, setVisibleLogs] = useState(50);
+            const logsContainerRef = useRef(null);
+
+            useEffect(() => {
+                // Only scroll the logs container, not the entire page
+                if (autoScroll && logsContainerRef.current) {
+                    logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
+                }
+            }, [logs, recentLogs, autoScroll]);
+
+            const toggleAutoScroll = () => setAutoScroll(!autoScroll);
+
+            const loadMoreLogs = () => setVisibleLogs(prevVisible => Math.min(prevVisible + 20, allLogs.length));
+
+            const getLogType = (message) => {
+                if (message.toLowerCase().includes('error')) return 'error';
+                if (message.toLowerCase().includes('warning') || 
+                    message.toLowerCase().includes('cannot place trade') || 
+                    message.toLowerCase().includes('order limit reached') || 
+                    message.toLowerCase().includes('only one order per side allowed')) return 'warning';
+                if (message.toLowerCase().includes('success')) return 'success';
+                return '';
+            };
+
+            const allLogs = [...recentLogs, ...logs];
+            const filteredLogs = allLogs;
+
+            return (
+                React.createElement('div', { className: 'data-card' },
+                    React.createElement('div', { className: 'sticky-header flex justify-between items-center' },
+                        React.createElement('h3', { className: 'text-lg font-semibold text-gray-900' }, `Logs for Account ${selectedAccount}`),
+                        React.createElement('div', { className: 'flex gap-2' },
+                            React.createElement('button', {
+                                onClick: toggleAutoScroll,
+                                className: `px-3 py-1 text-sm font-medium rounded-md ${autoScroll ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`
+                            }, autoScroll ? 'Auto-scroll ON' : 'Auto-scroll OFF'),
+                            React.createElement('button', {
+                                onClick: loadMoreLogs,
+                                className: 'px-3 py-1 text-sm font-medium bg-gray-100 text-gray-800 rounded-md'
+                            }, 'Load More')
+                        )
+                    ),
+                    React.createElement('div', { 
+                        className: 'logs-container', 
+                        style: { maxHeight: '300px', overflowY: 'auto' },
+                        ref: logsContainerRef
+                    },
+                        filteredLogs.slice(-visibleLogs).map((log, index) => (
+                            React.createElement('div', {
+                                key: index,
+                                className: `log-entry ${getLogType(log.message)}`
+                            },
+                                React.createElement('span', { className: 'log-timestamp' }, log.time),
+                                React.createElement(LogMessage, { message: log.message })
+                            )
+                        ))
+                    )
+                )
+            );
+        }
+
+        function LogMessage({ message }) {
+            const [isExpanded, setIsExpanded] = useState(false);
+            const toggleExpand = () => setIsExpanded(!isExpanded);
+
+            // Increased character limit to 150 to accommodate longer messages with patterns like [:1,"fd":5,"lh":"Body","fr":"5"]
+            if (message.length <= 150) {
+                return React.createElement('span', { className: 'log-message' }, message);
+            }
+
+            return React.createElement('span', { className: 'log-message' },
+                isExpanded ? message : message.slice(0, 150) + '...',
+                React.createElement('button', {
+                    onClick: toggleExpand,
+                    className: 'ml-2 text-blue-600 hover:text-blue-800'
+                }, isExpanded ? 'Show Less' : 'Show More')
+            );
+        }
+
+        function App() {
+            const [data, setData] = useState(null);
+            const [error, setError] = useState(null);
+            const [loading, setLoading] = useState(true);
+            const [selectedAccount, setSelectedAccount] = useState('3979937');
+            const [activeTab, setActiveTab] = useState('active');
+            const [dateFilter, setDateFilter] = useState(() => {
+                const end = new Date();
+                const start = new Date();
+                start.setDate(start.getDate() - 6);
+                return { 
+                    start: formatDate(start), 
+                    end: formatDate(end) 
+                };
+            });
+            const [resumoDateFilter, setResumoDateFilter] = useState(() => {
+                const end = new Date();
+                const start = new Date();
+                start.setDate(start.getDate() - 6);
+                return { 
+                    start: formatDate(start), 
+                    end: formatDate(end) 
+                };
+            });
+            const [logs, setLogs] = useState([]);
+            const [recentDbOrders, setRecentDbOrders] = useState([]);
+            const [webhookOutcomes, setWebhookOutcomes] = useState([]);
+            const [activeOrdersCount, setActiveOrdersCount] = useState(0);
+            const [closedOrdersCount, setClosedOrdersCount] = useState(0);
+            const [recentDbOrdersCount, setRecentDbOrdersCount] = useState(0);
+            const [dailyPnLData, setDailyPnLData] = useState([]);
+            const [recentLogs, setRecentLogs] = useState([]);
+            const wsRef = useRef(null);
+            const [mainTab, setMainTab] = useState('dashboard');
+            const [startingBalance, setStartingBalance] = useState(() => {
+                const saved = localStorage.getItem('startingBalance');
+                return saved ? parseFloat(saved) : 500;
+            });
+            const [allAccountsData, setAllAccountsData] = useState({});
+            const [chartTimeframe, setChartTimeframe] = useState('1h');
+            const [chartData, setChartData] = useState([]);
+            const chartContainerRef = useRef(null);
+            const chartInstanceRef = useRef(null);
+
+            const addLog = useCallback((message) => {
+                setLogs(prevLogs => {
+                    const newLog = { 
+                        time: formatDateTime(new Date()), 
+                        message 
+                    };
+                    return [...prevLogs, newLog].slice(-50);
+                });
+            }, []);
+
+            const debouncedAddLog = useCallback((message) => {
+                const key = message.split(':')[0];
+                setLogs(prevLogs => {
+                    const index = prevLogs.findIndex(log => log.message.startsWith(key));
+                    if (index !== -1) {
+                        const updatedLogs = [...prevLogs];
+                        updatedLogs[index] = { 
+                            time: formatDateTime(new Date()), 
+                            message 
+                        };
+                        return updatedLogs;
+                    } else {
+                        const newLog = { 
+                            time: formatDateTime(new Date()), 
+                            message 
+                        };
+                        return [...prevLogs, newLog].slice(-50);
+                    }
+                });
+            }, []);
+
+            const processDailyPnLData = useCallback((closedOrders, serverTime) => {
+                const dailyPnL = {};
+                const serverDate = new Date(serverTime);
+                if (isNaN(serverDate.getTime())) {
+                    console.error('Invalid serverTime:', serverTime);
+                    return;
+                }
+                const todayUTC = serverDate.toISOString().split('T')[0];
+                console.log('Server date (UTC):', todayUTC);
+
+                let latestTradeDate = new Date(0);
+                let earliestTradeDate = new Date();
+
+                console.log('Processing closed orders:', closedOrders);
+                closedOrders.forEach(order => {
+                    const closeTime = new Date(order.closeTime);
+                    if (isNaN(closeTime.getTime())) {
+                        console.warn('Invalid closeTime:', order.closeTime);
+                        return;
+                    }
+                    const date = closeTime.toISOString().split('T')[0];
+                    
+                    // Apply date filter
+                    if (dateFilter.start && new Date(date) < new Date(dateFilter.start)) return;
+                    if (dateFilter.end && new Date(date) > new Date(dateFilter.end)) return;
+
+                    const profit = parseFloat(order.profit) || 0;
+
+                    if (!dailyPnL[date]) {
+                        dailyPnL[date] = 0;
+                    }
+                    dailyPnL[date] += profit;
+
+                    if (closeTime > latestTradeDate) latestTradeDate = closeTime;
+                    if (closeTime < earliestTradeDate) earliestTradeDate = closeTime;
+                });
+
+                latestTradeDate = new Date(Math.max(latestTradeDate.getTime(), serverDate.getTime()));
+                const latestTradeDateUTC = latestTradeDate.toISOString().split('T')[0];
+                console.log('Latest trade date:', latestTradeDateUTC);
+
+                const startDate = new Date(dateFilter.start || earliestTradeDate);
+                const endDate = new Date(dateFilter.end || latestTradeDate);
+                console.log('Start date:', startDate.toISOString().split('T')[0]);
+                console.log('End date:', endDate.toISOString().split('T')[0]);
+
+                const pnlData = [];
+                for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                    const dateString = d.toISOString().split('T')[0];
+                    const pnl = dailyPnL[dateString] || 0;
+                    pnlData.push({
+                        date: dateString,
+                        pnl: pnl,
+                        fill: pnl >= 0 ? '#22c55e' : '#ef4444'
+                    });
+                }
+
+                console.log('Final P&L data:', pnlData);
+                setDailyPnLData(pnlData);
+            }, [dateFilter]);
+
+            const fetchData = useCallback(async (loginNumber) => {
+                setLoading(true);
+                setError(null);
+                try {
+                    console.log(`Fetching data for account ${loginNumber}`);
+                    
+                    // Always use the secondary API for account 3979937
+                    const useSecondaryApi = loginNumber === '3979937';
+                    const url = `/api/status/${loginNumber}?t=${Date.now()}${useSecondaryApi ? '&useSecondaryApi=true' : ''}`;
+                    
+                    console.log(`Making request to: ${url}`);
+                    const response = await fetch(url);
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error(`HTTP error! status: ${response.status}, response: ${errorText}`);
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const jsonData = await response.json();
+                    console.log('Fetched data:', jsonData);
+                    
+                    // Check if we have active orders
+                    if (jsonData.activeOrders && jsonData.activeOrders.data && jsonData.activeOrders.data.marketOrders) {
+                        console.log(`Active orders count: ${jsonData.activeOrders.data.marketOrders.length}`);
+                        console.log('Active orders:', jsonData.activeOrders.data.marketOrders);
+                    } else {
+                        console.warn('No active orders found in response');
+                    }
+                    
+                    // Check if we have closed orders
+                    if (jsonData.closedOrders && jsonData.closedOrders.data && jsonData.closedOrders.data.marketOrders) {
+                        console.log(`Closed orders count: ${jsonData.closedOrders.data.marketOrders.length}`);
+                    } else {
+                        console.warn('No closed orders found in response');
+                    }
+                    
+                    if (jsonData.orderCounts) {
+                        console.log('Order volumes:', jsonData.orderCounts);
+                    }
+
+                    let unrealizedPnL = 0;
+                    let realizedPnL = 0;
+
+                    // Only apply date filter to closed orders, not active orders
+                    const filterDateForClosed = (date) => {
+                        return (!dateFilter.start || new Date(date) >= new Date(dateFilter.start)) &&
+                               (!dateFilter.end || new Date(date) <= new Date(dateFilter.end));
+                    };
+
+                    if (jsonData.activeOrders && jsonData.activeOrders.data && jsonData.activeOrders.data.marketOrders) {
+                        // Don't filter active orders by date
+                        unrealizedPnL = jsonData.activeOrders.data.marketOrders
+                            .reduce((sum, order) => sum + parseFloat(order.profit), 0);
+                    }
+
+                    if (jsonData.closedOrders && jsonData.closedOrders.data && jsonData.closedOrders.data.marketOrders) {
+                        // Apply date filter only to closed orders
+                        realizedPnL = jsonData.closedOrders.data.marketOrders
+                            .filter(order => filterDateForClosed(order.closeTime))
+                            .reduce((sum, order) => sum + parseFloat(order.profit), 0);
+                    }
+
+                    setData({...jsonData, unrealizedPnL, realizedPnL});
+                    setActiveOrdersCount(jsonData.activeOrders?.data?.marketOrders?.length || 0);
+                    setClosedOrdersCount(jsonData.closedOrders?.data?.marketOrders?.length || 0);
+                    processDailyPnLData(jsonData.closedOrders?.data?.marketOrders || [], jsonData.serverTime);
+                } catch (err) {
+                    console.error('Error fetching data:', err);
+                    setError(err.message);
+                    addLog(`Error fetching data: ${err.message}`);
+                } finally {
+                    setLoading(false);
+                }
+            }, [addLog, processDailyPnLData, dateFilter]);
+
+            const fetchWebhookOutcomes = useCallback(async (loginNumber) => {
+                try {
+                    const response = await fetch(`/api/webhook-outcomes/${loginNumber}?limit=100`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const outcomes = await response.json();
+                    return outcomes;
+                } catch (err) {
+                    console.error('Error fetching webhook outcomes:', err);
+                    addLog(`Error fetching webhook outcomes: ${err.message}`);
+                    return [];
+                }
+            }, [addLog]);
+
+            const fetchRecentDbOrders = useCallback(async (loginNumber) => {
+                try {
+                    const response = await fetch(`/api/recent-db-orders/${loginNumber}`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const jsonData = await response.json();
+                    console.log('Recent DB orders:', jsonData);
+                    setRecentDbOrders(jsonData);
+                    setRecentDbOrdersCount(jsonData.length);
+                } catch (err) {
+                    console.error('Error fetching recent DB orders:', err);
+                    addLog(`Error fetching recent DB orders: ${err.message}`);
+                }
+            }, [addLog]);
+
+            const calculateClosedOrderTotals = useCallback((orders) => {
+                return orders.reduce((acc, order) => {
+                    if (order.side === 'BUY') {
+                        acc.buyVolume += order.volume;
+                    } else if (order.side === 'SELL') {
+                        acc.sellVolume += order.volume;
+                    }
+                    return acc;
+                }, { buyVolume: 0, sellVolume: 0 });
+            }, []);
+
+            useEffect(() => {
+                fetchData(selectedAccount);
+                fetchRecentDbOrders(selectedAccount);
+                fetchWebhookOutcomes(selectedAccount).then(setWebhookOutcomes);
+                const interval = setInterval(() => {
+                    fetchData(selectedAccount);
+                    fetchRecentDbOrders(selectedAccount);
+                    fetchWebhookOutcomes(selectedAccount).then(setWebhookOutcomes);
+                }, 5000);
+
+                return () => {
+                    clearInterval(interval);
+                    if (wsRef.current) {
+                        wsRef.current.close();
+                    }
+                };
+            }, [selectedAccount, fetchData, fetchRecentDbOrders, dateFilter]);
+
+            useEffect(() => {
+                async function fetchRecentLogs(account) {
+                    try {
+                        const response = await fetch(`/api/recent-logs?account=${account}`);
+                        if (response.ok) {
+                            const logs = await response.json();
+                            setRecentLogs(logs);
+                        }
+                    } catch (error) {
+                        console.error('Error fetching recent logs:', error);
+                    }
+                }
+
+                fetchRecentLogs(selectedAccount);
+                const interval = setInterval(() => {
+                    fetchRecentLogs(selectedAccount);
+                }, 5000);
+
+                return () => clearInterval(interval);
+            }, [selectedAccount]);
+
+            const fetchAllAccountsData = useCallback(async () => {
+                if (mainTab !== 'resumo') return;
+                
+                const accounts = ['3979937'];
+                const newData = {};
+                
+                for (const account of accounts) {
+                    try {
+                        // Add date filter parameters to the API call
+                        const response = await fetch(`/api/status/${account}?t=${Date.now()}&startDate=${resumoDateFilter.start}&endDate=${resumoDateFilter.end}`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            newData[account] = {
+                                accountType: data.accountType,
+                                equity: data.accountStatus?.data?.equity || 0
+                            };
+                        }
+                    } catch (error) {
+                        console.error(`Error fetching data for account ${account}:`, error);
+                    }
+                }
+                
+                setAllAccountsData(newData);
+            }, [mainTab, startingBalance, resumoDateFilter]);
+
+            const formatDateTime = (timestamp) => {
+                if (!timestamp) return 'N/A';
+                const date = new Date(typeof timestamp === 'string' ? timestamp : Number(timestamp));
+                return date.toISOString().replace('T', ' ').substr(0, 19);
+            };
+
+            const columns = [
+                { key: 'id', label: 'ID' },
+                { key: 'symbol', label: 'SYMBOL' },
+                { key: 'side', label: 'SIDE' },
+                { key: 'volume', label: 'VOL' },
+                { key: 'spread_at_open', label: 'SPREAD', render: (row) => row.spread_at_open != null ? Math.round(parseFloat(row.spread_at_open) * 10) : 'N/A' },
+                { key: 'openPrice', label: 'OP' },
+                { key: 'ob_reference_price', label: 'OB REF', render: (row) => row.ob_reference_price != null ? parseFloat(row.ob_reference_price).toFixed(5) : 'N/A' },
+                { key: 'diff_op_ob', label: 'DIST. OP/OB', render: (row) => {
+                    if (row.openPrice != null && row.ob_reference_price != null) {
+                        const diff = Math.abs(row.openPrice - row.ob_reference_price) * 10000;
+                        return diff.toFixed(1);
+                    }
+                    return 'N/A';
+                }},
+                { key: 'takeProfit', label: 'TP' },
+                { key: 'real_tp_pips', label: 'TP PIPS', render: (row) => row.real_tp_pips != null ? Math.round(parseFloat(row.real_tp_pips)) : 'N/A' },
+                { key: 'stopLoss', label: 'SL' },
+                { key: 'real_sl_pips', label: 'SL PIPS', render: (row) => row.real_sl_pips != null ? Math.round(parseFloat(row.real_sl_pips)) : 'N/A' },
+                { key: 'openTime', label: 'OPEN T.', render: (row) => formatDateTime(row.openTime) },
+                { key: 'profit', label: 'PROFIT', render: (row) => React.createElement('span', { className: `font-bold text-lg ${parseFloat(row.profit) >= 0 ? 'text-green-600' : 'text-red-600'}` }, parseFloat(row.profit).toFixed(2)) },
+            ];
+
+            const closedOrderColumns = [
+                { key: 'id', label: 'ID' },
+                { key: 'symbol', label: 'SYMBOL' },
+                { key: 'side', label: 'SIDE' },
+                { key: 'volume', label: 'VOL' },
+                { key: 'spread_at_open', label: 'SPREAD', render: (row) => row.spread_at_open != null ? Math.round(parseFloat(row.spread_at_open) * 10) : 'N/A' },
+                { key: 'openPrice', label: 'OPEN PRICE' },
+                { key: 'closePrice', label: 'CLOSE PRICE' },
+                { key: 'ob_reference_price', label: 'OB REF', render: (row) => row.ob_reference_price != null ? parseFloat(row.ob_reference_price).toFixed(5) : 'N/A' },
+                { key: 'diff_op_ob', label: 'DIST. OP/OB', render: (row) => {
+                    if (row.openPrice != null && row.ob_reference_price != null) {
+                        const diff = Math.abs(row.openPrice - row.ob_reference_price) * 10000;
+                        return diff.toFixed(1);
+                    }
+                    return 'N/A';
+                }},
+                { key: 'takeProfit', label: 'TP' },
+                { key: 'real_tp_pips', label: 'TP PIPS', render: (row) => row.real_tp_pips != null ? Math.round(parseFloat(row.real_tp_pips)) : 'N/A' },
+                { key: 'stopLoss', label: 'SL' },
+                { key: 'real_sl_pips', label: 'SL PIPS', render: (row) => row.real_sl_pips != null ? Math.round(parseFloat(row.real_sl_pips)) : 'N/A' },
+                { key: 'openTime', label: 'OPEN TIME', render: (row) => formatDateTime(row.openTime) },
+                { key: 'closeTime', label: 'CLOSE TIME', render: (row) => formatDateTime(row.closeTime) },
+                { key: 'duration_in_minutes', label: 'DURATION (MIN)', render: (row) => row.duration_in_minutes != null ? row.duration_in_minutes : 'N/A' },
+                { key: 'profit', label: 'PROFIT', render: (row) => React.createElement('span', { className: `font-bold text-lg ${parseFloat(row.profit) >= 0 ? 'text-green-600' : 'text-red-600'}` }, parseFloat(row.profit).toFixed(2)) },
+            ];
+
+            const recentDbColumns = [
+                { key: 'order_id', label: 'ID' },
+                { key: 'symbol', label: 'SYMBOL' },
+                { key: 'side', label: 'SIDE' },
+                { key: 'volume', label: 'VOL' },
+                { key: 'ob_reference_price', label: 'OB REF', render: (row) => row.ob_reference_price != null ? parseFloat(row.ob_reference_price).toFixed(5) : 'N/A' },
+                { key: 'open_price', label: 'OP' },
+                { key: 'diff_op_ob', label: 'DIST. OP/OB', render: (row) => {
+                    if (row.open_price != null && row.ob_reference_price != null) {
+                        const diff = Math.abs(row.open_price - row.ob_reference_price) * 10000;
+                        return diff.toFixed(1);
+                    }
+                    return 'N/A';
+                }},
+                { key: 'take_profit', label: 'TP' },
+                { key: 'stop_loss', label: 'SL' },
+                { key: 'open_time', label: 'OPEN T.', render: (row) => formatDateTime(row.open_time) },
+                { key: 'real_sl_pips', label: 'SL PIPS', render: (row) => row.real_sl_pips != null ? Math.round(parseFloat(row.real_sl_pips)) : 'N/A' },
+                { key: 'real_tp_pips', label: 'TP PIPS', render: (row) => row.real_tp_pips != null ? Math.round(parseFloat(row.real_tp_pips)) : 'N/A' },
+                { key: 'spread_at_open', label: 'SPREAD', render: (row) => row.spread_at_open != null ? Math.round(parseFloat(row.spread_at_open) * 10) : 'N/A' },
+                { key: 'profit', label: 'PROFIT', render: (row) => row.profit != null ? parseFloat(row.profit).toFixed(2) : 'N/A' },
+                { key: 'closePrice', label: 'CP', render: (row) => row.closePrice != null ? row.closePrice.toFixed(5) : 'N/A' },
+                { key: 'closeTime', label: 'CLOSE T.', render: (row) => row.closeTime ? formatDateTime(row.closeTime) : 'N/A' },
+            ];
+
+            // Modified to only apply date filtering to closed orders, not active orders
+            const filterClosedOrders = (orders) => {
+                if (!dateFilter.start && !dateFilter.end) return orders;
+                return orders.filter(order => {
+                    const orderDate = new Date(order.closeTime || order.openTime);
+                    const startDate = dateFilter.start ? new Date(dateFilter.start) : null;
+                    const endDate = dateFilter.end ? new Date(dateFilter.end) : null;
+                    
+                    if (startDate && endDate) {
+                        return orderDate >= startDate && orderDate <= endDate;
+                    } else if (startDate) {
+                        return orderDate >= startDate;
+                    } else if (endDate) {
+                        return orderDate <= endDate;
+                    }
+                    return true;
+                });
+            };
+
+            useEffect(() => {
+                if (mainTab === 'resumo') {
+                    fetchAllAccountsData();
+                    const interval = setInterval(fetchAllAccountsData, 10000);
+                    return () => clearInterval(interval);
+                }
+            }, [mainTab, fetchAllAccountsData]);
+
+            const handleStartingBalanceChange = (e) => {
+                const value = parseFloat(e.target.value);
+                if (!isNaN(value) && value > 0) {
+                    setStartingBalance(value);
+                    localStorage.setItem('startingBalance', value.toString());
+                }
+            };
+
+            // Update the fetchChartData function to use the new SimpleFX API endpoint
+            const fetchChartData = useCallback(async (timeframe) => {
+                try {
+                    console.log('Fetching EURUSD chart data for timeframe:', timeframe);
+                    
+                    // Use the new SimpleFX API endpoint
+                    const endpoint = `/api/simplefx-chart-data?symbol=EURUSD&timeframe=${timeframe}&account=${selectedAccount}`;
+                    const response = await fetch(endpoint);
+                    
+                    if (!response.ok) {
+                        throw new Error(`Failed to fetch chart data: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data && Array.isArray(data) && data.length > 0) {
+                        console.log(`Loaded ${data.length} historical candles for EURUSD from SimpleFX`);
+                        setChartData(data);
+                    } else {
+                        console.warn('No historical data available, using sample data');
+                        // Fallback to sample data if API doesn't return data
+                        generateSampleData(timeframe);
+                    }
+                } catch (error) {
+                    console.error('Error fetching chart data:', error);
+                    addLog(`Error fetching chart data: ${error.message}. Using sample data instead.`);
+                    // Fallback to sample data on error
+                    generateSampleData(timeframe);
+                }
+            }, [addLog, selectedAccount]);
+
+            // Add this function to generate sample data as a fallback
+            const generateSampleData = (timeframe) => {
+                console.log('Generating sample chart data for timeframe:', timeframe);
+                
+                const now = new Date();
+                const sampleData = [];
+                
+                // Generate more data points for smaller timeframes
+                const dataPoints = timeframe === '1m' ? 200 : 
+                                  timeframe === '5m' ? 150 : 
+                                  timeframe === '15m' ? 100 : 
+                                  timeframe === '1h' ? 80 : 
+                                  timeframe === '4h' ? 60 : 40;
+                
+                // Adjust time increment based on timeframe
+                const timeIncrement = timeframe === '1m' ? 1 : 
+                                     timeframe === '5m' ? 5 : 
+                                     timeframe === '15m' ? 15 : 
+                                     timeframe === '1h' ? 60 : 
+                                     timeframe === '4h' ? 240 : 1440; // minutes
+                
+                // Use a more realistic price range for EURUSD
+                const basePrice = 1.0850;
+                const volatility = 0.0005; // Realistic volatility for EURUSD
+                
+                // Generate data that looks more like actual price movements
+                let lastClose = basePrice;
+                
+                for (let i = 0; i < dataPoints; i++) {
+                    const time = new Date(now);
+                    time.setMinutes(time.getMinutes() - (dataPoints - i) * timeIncrement);
+                    
+                    // Create more realistic price movements
+                    const change = (Math.random() - 0.5) * volatility;
+                    const open = lastClose;
+                    const close = open + change;
+                    const high = Math.max(open, close) + (Math.random() * volatility * 0.5);
+                    const low = Math.min(open, close) - (Math.random() * volatility * 0.5);
+                    
+                    lastClose = close;
+                    
+                    sampleData.push({
+                        time: Math.floor(time.getTime() / 1000),
+                        open,
+                        high,
+                        low,
+                        close
+                    });
+                }
+                
+                setChartData(sampleData);
+            };
+
+            // Update the renderChart function to fix the decimal places and R:R ratio issues
+            const renderChart = useCallback(() => {
+                if (!chartContainerRef.current || chartData.length === 0) return;
+                
+                // Clear previous chart if it exists
+                if (chartInstanceRef.current) {
+                    chartInstanceRef.current.remove();
+                    chartInstanceRef.current = null;
+                }
+                
+                try {
+                    // Create a new chart with professional styling
+                    const chart = LightweightCharts.createChart(chartContainerRef.current, {
+                        width: chartContainerRef.current.clientWidth,
+                        height: 500,
+                        layout: {
+                            backgroundColor: '#ffffff',
+                            textColor: '#333',
+                            fontSize: 12,
+                            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
+                        },
+                        grid: {
+                            vertLines: {
+                                color: 'rgba(197, 203, 206, 0.2)',
+                                style: 1,
+                            },
+                            horzLines: {
+                                color: 'rgba(197, 203, 206, 0.2)',
+                                style: 1,
+                            },
+                        },
+                        crosshair: {
+                            mode: LightweightCharts.CrosshairMode.Normal,
+                            vertLine: {
+                                color: 'rgba(32, 38, 46, 0.1)',
+                                width: 1,
+                                style: 0,
+                            },
+                            horzLine: {
+                                color: 'rgba(32, 38, 46, 0.1)',
+                                width: 1,
+                                style: 0,
+                            },
+                        },
+                        rightPriceScale: {
+                            borderColor: 'rgba(197, 203, 206, 0.8)',
+                            scaleMargins: {
+                                top: 0.1,
+                                bottom: 0.1,
+                            },
+                            visible: true,
+                            // Ensure 5 decimal places for EURUSD on the Y-axis
+                            format: {
+                                type: 'price',
+                                precision: 5,
+                                minMove: 0.00001,
+                            },
+                            // Force price formatting to always show 5 decimal places
+                            formatPrice: (price) => price.toFixed(5),
+                        },
+                        priceScale: {
+                            mode: LightweightCharts.PriceScaleMode.Normal,
+                            autoScale: true,
+                            invertScale: false,
+                            alignLabels: true,
+                            borderVisible: true,
+                            borderColor: '#555',
+                            entireTextOnly: false,
+                            ticksVisible: true,
+                            scaleMargins: {
+                                top: 0.1,
+                                bottom: 0.1,
+                            },
+                            // This ensures the price labels on the Y-axis always show 5 decimal places
+                            formatter: (price) => price.toFixed(5),
+                        },
+                        watermark: {
+                            visible: true,
+                            fontSize: 36,
+                            horzAlign: 'center',
+                            vertAlign: 'center',
+                            color: 'rgba(171, 71, 188, 0.05)',
+                            text: 'EURUSD',
+                        },
+                    });
+                    
+                    // Add a candlestick series with professional styling
+                    const candlestickSeries = chart.addCandlestickSeries({
+                        upColor: '#26a69a',
+                        downColor: '#ef5350',
+                        borderUpColor: '#26a69a',
+                        borderDownColor: '#ef5350',
+                        wickUpColor: '#26a69a',
+                        wickDownColor: '#ef5350',
+                        priceFormat: {
+                            type: 'price',
+                            precision: 5,
+                            minMove: 0.00001,
+                        },
+                    });
+                    
+                    // Set the data
+                    candlestickSeries.setData(chartData);
+                    
+                    // Add volume series below price chart
+                    const volumeSeries = chart.addHistogramSeries({
+                        color: '#26a69a',
+                        priceFormat: {
+                            type: 'volume',
+                        },
+                        priceScaleId: '',
+                        scaleMargins: {
+                            top: 0.8,
+                            bottom: 0,
+                        },
+                    });
+                    
+                    // Generate volume data from price data
+                    const volumeData = chartData.map(item => ({
+                        time: item.time,
+                        value: Math.random() * 1000 + 500, // Random volume
+                        color: item.close >= item.open ? '#26a69a80' : '#ef535080',
+                    }));
+                    
+                    volumeSeries.setData(volumeData);
+                    
+                    // Add position markers if we have active orders
+                    if (data && data.activeOrders && data.activeOrders.data && data.activeOrders.data.marketOrders) {
+                        const activeOrders = data.activeOrders.data.marketOrders;
+                        const markers = [];
+                        
+                        activeOrders.forEach(order => {
+                            if (order.symbol === 'EURUSD') {
+                                // Add entry price line with improved styling
+                                const entryPrice = parseFloat(order.openPrice);
+                                const entryLine = candlestickSeries.createPriceLine({
+                                    price: parseFloat(entryPrice.toFixed(5)),
+                                    color: order.side === 'BUY' ? '#2196F3' : '#FF5722',
+                                    lineWidth: 2,
+                                    lineStyle: LightweightCharts.LineStyle.Solid,
+                                    axisLabelVisible: true,
+                                    title: `${order.side} ${order.volume}`,
+                                    lineVisible: true,
+                                });
+                                
+                                // Only add SL/TP lines if they exist
+                                if (order.stopLoss) {
+                                    const slPrice = parseFloat(order.stopLoss);
+                                    candlestickSeries.createPriceLine({
+                                        price: parseFloat(slPrice.toFixed(5)),
+                                        color: '#F44336',
+                                        lineWidth: 1,
+                                        lineStyle: LightweightCharts.LineStyle.Dashed,
+                                        axisLabelVisible: true,
+                                        title: `SL (${Math.abs(entryPrice - slPrice).toFixed(5)})`,
+                                    });
+                                }
+                                
+                                if (order.takeProfit) {
+                                    const tpPrice = parseFloat(order.takeProfit);
+                                    candlestickSeries.createPriceLine({
+                                        price: parseFloat(tpPrice.toFixed(5)),
+                                        lineWidth: 1,
+                                        lineStyle: LightweightCharts.LineStyle.Dashed,
+                                        color: '#4CAF50',
+                                        axisLabelVisible: true,
+                                        title: `TP (${Math.abs(entryPrice - tpPrice).toFixed(5)})`,
+                                    });
+                                }
+                                
+                                // Add risk/reward ratio marker only if both SL and TP exist
+                                if (order.stopLoss && order.takeProfit) {
+                                    const slPrice = parseFloat(order.stopLoss);
+                                    const tpPrice = parseFloat(order.takeProfit);
+                                    const riskPips = Math.abs(entryPrice - slPrice) * 10000;
+                                    const rewardPips = Math.abs(entryPrice - tpPrice) * 10000;
+                                    
+                                    // Only calculate R:R if risk is not zero
+                                    if (riskPips > 0 && !isNaN(riskPips) && !isNaN(rewardPips)) {
+                                        const rr = (rewardPips / riskPips).toFixed(2);
+                                        
+                                        // Add a marker to show the R:R ratio
+                                        const markerPosition = chartData[chartData.length - 5]?.time;
+                                        if (markerPosition) {
+                                            markers.push({
+                                                time: markerPosition,
+                                                position: 'aboveBar',
+                                                color: '#9C27B0',
+                                                shape: 'circle',
+                                                text: `R:R = 1:${rr}`,
+                                            });
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        
+                        if (markers.length > 0) {
+                            candlestickSeries.setMarkers(markers);
+                        }
+                    }
+                    
+                    // Add a legend
+                    const legend = document.createElement('div');
+                    legend.style.position = 'absolute';
+                    legend.style.left = '12px';
+                    legend.style.top = '12px';
+                    legend.style.zIndex = '1';
+                    legend.style.fontSize = '12px';
+                    legend.style.fontFamily = 'sans-serif';
+                    legend.style.lineHeight = '18px';
+                    legend.style.fontWeight = 'bold';
+                    legend.style.color = '#333';
+                    legend.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+                    legend.style.padding = '8px';
+                    legend.style.borderRadius = '4px';
+                    legend.style.boxShadow = '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)';
+                    chartContainerRef.current.appendChild(legend);
+                    
+                    // Update legend with latest price
+                    const updateLegend = () => {
+                        if (chartData.length > 0) {
+                            const lastCandle = chartData[chartData.length - 1];
+                            legend.innerHTML = `
+                                <div style="font-size: 14px; margin-bottom: 4px;">EURUSD - ${chartTimeframe}</div>
+                                <div>O: <span style="color:#777">${lastCandle.open.toFixed(5)}</span></div>
+                                <div>H: <span style="color:#777">${lastCandle.high.toFixed(5)}</span></div>
+                                <div>L: <span style="color:#777">${lastCandle.low.toFixed(5)}</span></div>
+                                <div>C: <span style="color:${lastCandle.close >= lastCandle.open ? '#26a69a' : '#ef5350'}">${lastCandle.close.toFixed(5)}</span></div>
+                            `;
+                        }
+                    };
+                    
+                    updateLegend();
+                    
+                    // Handle window resize
+                    const handleResize = () => {
+                        if (chartContainerRef.current) {
+                            chart.applyOptions({ 
+                                width: chartContainerRef.current.clientWidth 
+                            });
+                            updateLegend();
+                        }
+                    };
+                    
+                    window.addEventListener('resize', handleResize);
+                    
+                    // Save the chart instance for cleanup
+                    chartInstanceRef.current = {
+                        chart,
+                        remove: () => {
+                            window.removeEventListener('resize', handleResize);
+                            if (legend.parentNode) {
+                                legend.parentNode.removeChild(legend);
+                            }
+                            chart.remove();
+                        }
+                    };
+                } catch (error) {
+                    console.error('Error rendering chart:', error);
+                    addLog(`Error rendering chart: ${error.message}`);
+                }
+            }, [chartData, data, chartTimeframe]);
+
+            // Add a WebSocket connection for real-time updates
+            useEffect(() => {
+                if (mainTab !== 'charts') return;
+                
+                // Create a WebSocket connection for real-time updates
+                let ws = null;
+                
+                const connectWebSocket = () => {
+                    try {
+                        ws = new WebSocket('wss://web-quotes-core.simplefx.com/websocket/quotes');
+                        
+                        ws.onopen = () => {
+                            console.log('WebSocket connection established');
+                            // Subscribe to EURUSD quotes
+                            const subscribeMsg = {
+                                p: '/subscribe/addList',
+                                i: Date.now(),
+                                d: ['EURUSD']
+                            };
+                            ws.send(JSON.stringify(subscribeMsg));
+                        };
+                        
+                        ws.onmessage = (event) => {
+                            try {
+                                const message = JSON.parse(event.data);
+                                
+                                // Handle quote updates
+                                if (message.p === '/quotes/subscribed' || message.p === '/lastprices/list') {
+                                    const quote = message.d[0];
+                                    if (quote && quote.s === 'EURUSD') {
+                                        // Update the last candle with the new price
+                                        updateLastCandle(quote.b, quote.a);
+                                    }
+                                }
+                            } catch (e) {
+                                console.error('Error processing WebSocket message:', e);
+                            }
+                        };
+                        
+                        ws.onerror = (error) => {
+                            console.error('WebSocket error:', error);
+                        };
+                        
+                        ws.onclose = () => {
+                            console.log('WebSocket connection closed. Attempting to reconnect...');
+                            setTimeout(connectWebSocket, 5000);
+                        };
+                    } catch (error) {
+                        console.error('Error connecting to WebSocket:', error);
+                    }
+                };
+                
+                // Function to update the last candle with new price data
+                const updateLastCandle = (bid, ask) => {
+                    if (!chartData.length) return;
+                    
+                    setChartData(prevData => {
+                        const newData = [...prevData];
+                        const lastCandle = {...newData[newData.length - 1]};
+                        const price = (bid + ask) / 2;
+                        
+                        // Update the last candle
+                        lastCandle.high = Math.max(lastCandle.high, price);
+                        lastCandle.low = Math.min(lastCandle.low, price);
+                        lastCandle.close = price;
+                        
+                        newData[newData.length - 1] = lastCandle;
+                        return newData;
+                    });
+                };
+                
+                // Connect to WebSocket
+                connectWebSocket();
+                
+                // Clean up WebSocket on unmount
+                return () => {
+                    if (ws) {
+                        ws.close();
+                    }
+                };
+            }, [mainTab, chartData]);
+
+            useEffect(() => {
+                if (mainTab === 'charts') {
+                    fetchChartData(chartTimeframe);
+                }
+            }, [mainTab, chartTimeframe, fetchChartData]);
+
+            useEffect(() => {
+                if (mainTab === 'charts') {
+                    renderChart();
+                }
+            }, [mainTab, chartData, renderChart]);
+
+            if (loading && !data) return React.createElement('div', { className: 'text-center mt-8' }, 'Loading...');
+            if (error) return React.createElement('div', { className: 'text-centermt-8 text-red-600' }, `Error: ${error}`);
+            if (!data) return null;
+
+            // Don't apply date filtering to active orders
+            const activeOrders = data.activeOrders?.data?.marketOrders || [];
+            // Apply date filtering only to closed orders
+            const closedOrders = filterClosedOrders(data.closedOrders?.data?.marketOrders || []);
+
+            return React.createElement('div',{ className:'container mx-auto px-4 py-3' },
+                React.createElement('div', { className: 'mb-4 border-b border-gray-200' },
+                    React.createElement('div', { className: 'flex gap-4' },
+                        React.createElement('button', {
+                            className: `px-4 py-2 font-bold text-base rounded-t-lg ${mainTab === 'dashboard' ? 'bg-white border-t border-l border-r border-gray-200 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`,
+                            onClick: () => setMainTab('dashboard')
+                        }, 'Dashboard'),
+                        React.createElement('button', {
+                            className: `px-4 py-2 font-bold text-base rounded-t-lg ${mainTab === 'resumo' ? 'bg-white border-t border-l border-r border-gray-200 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`,
+                            onClick: () => setMainTab('resumo')
+                        }, 'Resumo'),
+                        React.createElement('button', {
+                            className: `px-4 py-2 font-bold text-base rounded-t-lg ${mainTab === 'charts' ? 'bg-white border-t border-l border-r border-gray-200 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`,
+                            onClick: () => setMainTab('charts')
+                        }, 'Charts')
+                    )
+                ),
+                
+                mainTab === 'dashboard' ? (
+                    React.createElement(React.Fragment, null,
+                        React.createElement('div', { className: 'mb-2 account-buttons-container' },
+                            React.createElement('div', { className: 'flex gap-2 flex-wrap' },
+                                React.createElement('button', {
+                                    className: `account-button ${selectedAccount === '3979937' ? 'active' : ''}`,
+                                    onClick: () => setSelectedAccount('3979937')
+                                }, '3979937 (LIVE)')
+                            )
+                        ),
+                        React.createElement('div', { className: 'grid grid-cols-12 gap-4 mb-4' },
+                            React.createElement('div', { className: 'col-span-3 data-card' },
+                                React.createElement('h2', { className: 'text-lg font-semibold text-gray-900 mb-2' }, 'Overview:'),
+                                React.createElement('table', { className: 'data-table w-full' },
+                                    React.createElement('tbody', null,
+                                        React.createElement('tr', null,
+                                            React.createElement('td', { className: 'data-label' }, 'Balance:'),
+                                            React.createElement('td', { className: 'data-value' }, data.accountStatus?.data?.balance.toFixed(2) || 'N/A')
+                                        ),
+                                        React.createElement('tr', null,
+                                            React.createElement('td', { className: 'data-label' }, 'Equity:'),
+                                            React.createElement('td', { className: 'data-value' }, data.accountStatus?.data?.equity.toFixed(2) || 'N/A')
+                                        ),
+                                        React.createElement('tr', null,
+                                            React.createElement('td', { className: 'data-label' }, 'Margin:'),
+                                            React.createElement('td', { className: 'data-value' }, data.accountStatus?.data?.margin.toFixed(2) || 'N/A')
+                                        ),
+                                        React.createElement('tr', null,
+                                            React.createElement('td', { className: 'data-label' }, 'Free Margin:'),
+                                            React.createElement('td', { className: 'data-value' }, data.accountStatus?.data?.freeMargin?.toFixed(2) || 'N/A')
+                                        ),
+                                        React.createElement('tr', null,
+                                            React.createElement('td', { className: 'data-label' }, 'Leverage:'),
+                                            React.createElement('td', { className: 'data-value' }, data.accountStatus?.data?.leverage || 'N/A')
+                                        ),
+                                        React.createElement('tr', null,
+                                            React.createElement('td', { className: 'data-label' }, 'Max Size:'),
+                                            React.createElement('td', { className: 'data-value' }, 
+                                                data.accountStatus?.maxSize != null 
+                                                    ? parseFloat(data.accountStatus.maxSize).toFixed(2) 
+                                                    : 'N/A'
+                                            )
+                                        ),
+                                        React.createElement('tr', null,
+                                            React.createElement('td', { className: 'data-label' }, 'Max Per Side:'),
+                                            React.createElement('td', { className: 'data-value' }, 
+                                                data.accountStatus?.maxPerSide != null 
+                                                    ? `${parseFloat(data.accountStatus.maxPerSide).toFixed(2)}%` 
+                                                    : 'N/A'
+                                            )
+                                        ),
+                                    )
+                                )
+                            ),
+                            React.createElement('div', { className: 'col-span-3 data-card' },
+                                React.createElement('h2', { className: 'text-lg font-semibold text-gray-900 mb-2' }, 'Results:'),
+                                React.createElement('table', { className: 'data-table w-full' },
+                                    React.createElement('tbody', null,
+                                        React.createElement('tr', null,
+                                            React.createElement('td', { className: 'data-label' }, 'Unrealized P&L:'),
+                                            React.createElement('td', { className: `data-value text-lg font-bold ${data.unrealizedPnL >= 0 ? 'text-green-600' : 'text-red-600'}` }, `$${data.unrealizedPnL ? data.unrealizedPnL.toFixed(2) : 'N/A'}`)
+                                        ),
+                                        React.createElement('tr', null,
+                                            React.createElement('td', { className: 'data-label' }, 'Realized P&L:'),
+                                            React.createElement('td', { className: `data-value text-lg font-bold ${data.realizedPnL >= 0 ? 'text-green-600' : 'text-red-600'}` }, `$${data.realizedPnL ? data.realizedPnL.toFixed(2) : 'N/A'}`)
+                                        )
+                                    )
+                                )
+                            ),
+                            React.createElement('div', { className: 'col-span-6 chart-card' },
+                                React.createElement('h2', { className: 'text-lg font-semibold text-gray-900 mb-2 text-center' }, 'Daily P&L'),
+                                React.createElement(DailyPnLChart, { data: dailyPnLData })
+                            )
+                        ),
+                        React.createElement(LogsSection, { logs: logs, recentLogs: recentLogs, selectedAccount: selectedAccount }),
+                        React.createElement('div', { className: 'data-card mt-3' },
+                            React.createElement('div', { className: 'border-b border-gray-200 pb-4 mb-4' },
+                                React.createElement('div', { className: 'flex justify-between items-center' },
+                                    React.createElement('div', { className: 'flex gap-2' },
+                                        React.createElement('button', {
+                                            className: `tab-button ${activeTab === 'active' ? 'active' : ''}`,
+                                            onClick: () => setActiveTab('active')
+                                        }, `Active Orders (${activeOrdersCount})`),
+                                        React.createElement('button', {
+                                            className: `tab-button ${activeTab === 'closed' ? 'active' : ''}`,
+                                            onClick: () => setActiveTab('closed')
+                                        }, `Closed Orders (${closedOrdersCount})`)
+                                    ),
+                                    // Moved status pills to the right, aligned with tab buttons
+                                    activeTab === 'active' && data.orderCounts && (
+                                        React.createElement('div', { className: 'flex items-center gap-3' },
+                                            (() => {
+                                                const diff = data.orderCounts.buyVolume - data.orderCounts.sellVolume;
+                                                const absDiff = Math.abs(diff);
+                                                if (absDiff < 0.01) {
+                                                    return React.createElement('div', { className: 'status-pill bg-yellow-100 text-yellow-800 border border-yellow-200' },
+                                                        'Neutral (0.00)'
+                                                    );
+                                                } else if (diff > 0) {
+                                                    return React.createElement('div', { className: 'status-pill bg-green-100 text-green-800 border border-green-200' },
+                                                        `Comprado (${absDiff.toFixed(2)})`
+                                                    );
+                                                } else {
+                                                    return React.createElement('div', { className: 'status-pill bg-red-100 text-red-800 border border-red-200' },
+                                                        `Vendido (${absDiff.toFixed(2)})`
+                                                    );
+                                                }
+                                            })(),
+                                            React.createElement('div', { className: 'status-pill bg-green-50 text-green-700 border border-green-200' },
+                                                `Buys: ${data.orderCounts.buyVolume.toFixed(2)}`
+                                            ),
+                                            React.createElement('div', { className: 'status-pill bg-red-50 text-red-700 border border-red-200' },
+                                                `Sells: ${data.orderCounts.sellVolume.toFixed(2)}`
+                                            ),
+                                            React.createElement('div', { className: 'status-pill bg-blue-50 text-blue-700 border border-blue-200' },
+                                                `Total Open: ${(data.orderCounts.buyVolume + data.orderCounts.sellVolume).toFixed(2)}`
+                                            )
+                                        )
+                                    ),
+                                    activeTab === 'closed' && (
+                                        React.createElement('div', { className: 'flex items-center gap-3' },
+                                            (() => {
+                                                const closedTotals = calculateClosedOrderTotals(closedOrders);
+                                                return React.createElement(React.Fragment, null,
+                                                    React.createElement('div', { className: 'status-pill bg-green-50 text-green-700 border border-green200' },
+                                                        `Closed Buys: ${closedTotals.buyVolume.toFixed(2)}`
+                                                    ),
+                                                    React.createElement('div', { className: 'status-pill bg-red-50 text-red-700 border border-red-200' },
+                                                        `Closed Sells: ${closedTotals.sellVolume.toFixed(2)}`
+                                                    )
+                                                );
+                                            })()
+                                        )
+                                    )
+                                )
+                            ),
+                            React.createElement('div', { className: 'px-4' },
+                                React.createElement('div', { className: 'flex justify-end items-center mb-4' },
+                                    // Only show date filter for closed orders tab
+                                    activeTab === 'closed' && (
+                                        React.createElement(DateFilter, { onFilterChange: (start, end) => setDateFilter({ start, end }) })
+                                    )
+                                ),
+                                React.createElement(Table, {
+                                    data: activeTab === 'active' ? activeOrders : (activeTab === 'closed' ? closedOrders : recentDbOrders),
+                                    columns: activeTab === 'active' ? columns : (activeTab === 'closed' ? closedOrderColumns : recentDbColumns),
+                                    tabName: activeTab === 'active' ? 'Active Orders' : (activeTab === 'closed' ? 'Closed Orders' : 'Recent DB Orders'),
+                                    selectedAccount: selectedAccount
+                                })
+                            )
+                        ),
+                    )
+                ) : mainTab === 'resumo' ? (
+                    React.createElement('div', { className: 'bg-white rounded-lg shadow-sm border border-gray-200 p-6' },
+                        React.createElement('div', { className: 'mb-6' },
+                            React.createElement('h2', { className: 'text-xl font-semibold text-gray-900 mb-4' }, 'Resumo de Contas'),
+                            React.createElement('div', { className: 'flex items-center gap-4 mb-4' },
+                                React.createElement('label', { className: 'font-medium text-gray-700' }, 'Valor Inicial:'),
+                                React.createElement('input', {
+                                    type: 'number',
+                                    value: startingBalance,
+                                    onChange: handleStartingBalanceChange,
+                                    className: 'border border-gray-300 rounded-md px-3 py-2 w-32',
+                                    min: '1',
+                                    step: '1'
+                                }),
+                                React.createElement('span', { className: 'text-sm text-gray-500' }, '(Valor inicial para cálculo de percentual)')
+                            ),
+                            React.createElement('div', { className: 'mb-4' },
+                                React.createElement(DateFilter, { 
+                                    onFilterChange: (start, end) => setResumoDateFilter({ start, end }) 
+                                })
+                            ),
+                            React.createElement('table', { className: 'min-w-full divide-y divide-gray-200' },
+                                React.createElement('thead', { className: 'bg-gray-50' },
+                                    React.createElement('tr', null,
+                                        React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Conta'),
+                                        React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Tipo'),
+                                        React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Equity Atual (Saldo atual com lucros/perdas abertas)'),
+                                        React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Variação (% de ganho/perda em relação ao valor inicial)')
+                                    )
+                                ),
+                                React.createElement('tbody', { className: 'divide-y divide-gray-200' },
+                                    Object.entries(allAccountsData).map(([account, data], index) => {
+                                        const percentChange = ((data.equity / startingBalance) * 100) - 100;
+                                        const isPositive = percentChange >= 0;
+                                        
+                                        return React.createElement('tr', { 
+                                            key: account,
+                                            className: index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                                        },
+                                            React.createElement('td', { className: 'px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900' }, account),
+                                            React.createElement('td', { className: 'px-6 py-4 whitespace-nowrap text-sm text-gray-500' }, data.accountType),
+                                            React.createElement('td', { className: 'px-6 py-4 whitespace-nowrap text-sm text-gray-900' }, `$${data.equity.toFixed(2)}`),
+                                            React.createElement('td', { className: `px-6 py-4 whitespace-nowrap text-sm font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}` },
+                                                `${isPositive ? '+' : ''}${percentChange.toFixed(2)}%`
+                                            )
+                                        );
+                                    })
+                                )
+                            )
+                        )
+                    )
+                ) : (
+                    // New charts tab content
+                    React.createElement('div', { className: 'bg-white rounded-lg shadow-sm border border-gray-200 p-6' },
+                        React.createElement('div', { className: 'mb-4 flex justify-between items-center' },
+                            React.createElement('h2', { className: 'text-xl font-semibold text-gray-900' }, 'EURUSD Chart with Positions'),
+                            React.createElement('div', { className: 'flex items-center gap-4' },
+                                React.createElement('div', { className: 'text-sm text-gray-500' }, 'Timeframe:'),
+                                React.createElement('div', { className: 'flex gap-1' },
+                                    ['1m', '5m', '15m', '1h', '4h', '1d'].map(tf => 
+                                        React.createElement('button', {
+                                            key: tf,
+                                            onClick: () => setChartTimeframe(tf),
+                                            className: `px-3 py-1 rounded ${chartTimeframe === tf 
+                                                ? 'bg-blue-500 text-white font-medium' 
+                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`
+                                        }, tf)
+                                    )
+                                )
+                            )
+                        ),
+                        React.createElement('div', { className: 'relative' },
+                            React.createElement('div', { 
+                                ref: chartContainerRef,
+                                className: 'w-full border border-gray-200 rounded-lg bg-white',
+                                style: { height: '500px' }
+                            })
+                        ),
+                        // Update the chart legend in the UI to include both Buy and Sell positions
+                        React.createElement('div', { className: 'mt-4 flex justify-between items-center' },
+                            React.createElement('div', { className: 'text-sm text-gray-500' },
+                                React.createElement('p', null, 'Chart shows EURUSD price data and active positions for the selected account.')
+                            ),
+                            React.createElement('div', { className: 'flex gap-4 text-sm' },
+                                React.createElement('div', { className: 'flex items-center' },
+                                    React.createElement('span', { 
+                                        className: 'inline-block w-3 h-3 rounded-full bg-blue-500 mr-2' 
+                                    }),
+                                    React.createElement('span', null, 'Buy Position')
+                                ),
+                                React.createElement('div', { className: 'flex items-center' },
+                                    React.createElement('span', { 
+                                        className: 'inline-block w-3 h-3 rounded-full bg-orange-500 mr-2' 
+                                    }),
+                                    React.createElement('span', null, 'Sell Position')
+                                ),
+                                React.createElement('div', { className: 'flex items-center' },
+                                    React.createElement('span', { 
+                                        className: 'inline-block w-3 h-0.5 bg-red-500 mr-2' 
+                                    }),
+                                    React.createElement('span', null, 'Stop Loss')
+                                ),
+                                React.createElement('div', { className: 'flex items-center' },
+                                    React.createElement('span', { 
+                                        className: 'inline-block w-3 h-0.5 bg-green-500 mr-2' 
+                                    }),
+                                    React.createElement('span', null, 'Take Profit')
+                                )
+                            )
+                        )
+                    )
+                ),
+                
+                React.createElement('div', { className: 'mt-4 text-sm text-gray-500' },
+                    React.createElement('p', null, `Server Time: ${data?.serverTime || 'N/A'}`),
+                    React.createElement('p', null, 'All dates and times are displayed in UTC (SimpleFX server time)')
+                )
+            );
+        }
+
+        function exportData(data, filename, fileType, accountNumber) {
+            const accountSuffix = `_account_${accountNumber}`;
+            const newFilename = filename.replace('.', `${accountSuffix}.`);
+
+            // Convert dates to DD/MM/YYYY format for export
+            const formattedData = data.map(row => {
+                const newRow = {...row};
+                if (newRow.openTime) {
+                    newRow.openTime = new Date(newRow.openTime).toLocaleString('en-GB', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: false,
+                        timeZone: 'UTC'
+                    }).replace(',', '');
+                }
+                if (newRow.closeTime) {
+                    newRow.closeTime = new Date(newRow.closeTime).toLocaleString('en-GB', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: false,
+                        timeZone: 'UTC'
+                    }).replace(',', '');
+                }
+                return newRow;
+            });
+
+            if (fileType === 'csv') {
+                const csvContent = "data:text/csv;charset=utf-8," 
+                    + formattedData.map(row => Object.values(row).join(",")).join("\n");
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", newFilename);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else if (fileType === 'xlsx') {
+                const ws = XLSX.utils.json_to_sheet(formattedData);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+                XLSX.writeFile(wb, newFilename);
+            }
+        }
+
+        try {
+            ReactDOM.render(React.createElement(App), document.getElementById('root'));
+        } catch (error) {
+            console.error('Error rendering the App:', error);
+            document.getElementById('root').innerHTML = '<div class="text-red-600">Error loading the application. Please check the console for more details.</div>';
+        }
+    </script>
+</body>
+</html>
+

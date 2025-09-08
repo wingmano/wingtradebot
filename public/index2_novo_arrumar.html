@@ -1,0 +1,3557 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WingTradeBot Status (New Version)</title>
+    <meta name="google" content="notranslate">
+    <script src="https://unpkg.com/react@17.0.2/umd/react.production.min.js" crossorigin=""></script>
+    <script src="https://unpkg.com/react-dom@17.0.2/umd/react-dom.production.min.js" crossorigin=""></script>
+    <script src="https://unpkg.com/prop-types@15.7.2/prop-types.min.js" crossorigin=""></script>
+    <script src="https://unpkg.com/recharts@2.6.2/umd/Recharts.js" crossorigin=""></script>
+    <script src="https://unpkg.com/@babel/standalone@7.20.15/babel.min.js" crossorigin=""></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <style>
+        .account-button {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: #374151;
+            transition: all 0.15s ease-in-out;
+            border: 2px solid #d1d5db;
+            border-radius: 0.5rem;
+            background-color: #f3f4f6;
+            width: 120px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .account-button.active {
+            color: white;
+            background-color: #3b82f6;
+            border-color: #2563eb;
+        }
+
+        .account-button:not(.active):hover {
+            background-color: #e5e7eb;
+            border-color: #9ca3af;
+        }
+
+        .tab-button {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: #374151;
+            transition: all 0.15s ease-in-out;
+            border: 2px solid #d1d5db;
+            border-radius: 0.5rem;
+            background-color: #f3f4f6;
+            width: 200px;
+        }
+
+        .tab-button.active {
+            color: white;
+            background-color: #3b82f6;
+            border-color: #2563eb;
+        }
+
+        .tab-button:not(.active):hover {
+            background-color: #e5e7eb;
+            border-color: #9ca3af;
+        }
+
+        .data-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            border: 1px solid #e5e7eb;
+            padding: 1rem;
+            padding-bottom: 0;
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: none;
+            background: white;
+        }
+
+        .data-table tr {
+            border: none;
+            transition: background-color 0.1s ease;
+        }
+
+        .data-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .data-table tr:hover {
+            background-color: #e3f2fd;
+        }
+
+        .data-table td {
+            padding: 6px 8px;
+            border: none;
+            vertical-align: middle;
+        }
+
+        .data-label {
+            font-size: 0.875rem;
+            color: #374151;
+            font-weight: 500;
+            white-space: nowrap;
+            text-align: right;
+            width: 45%;
+            padding-right: 12px;
+        }
+
+        .data-value {
+            font-size: 0.875rem;
+            color: #111827;
+            white-space: nowrap;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            text-align: left;
+            width: 55%;
+            padding-left: 8px;
+            font-weight: 600;
+        }
+
+        /* Professional overview section styling */
+        .overview-section {
+            margin-top: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .overview-section>*+* {
+            margin-top: 0.75rem;
+        }
+
+        .overview-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .overview-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .overview-card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 12px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .overview-card-content {
+            padding: 0;
+        }
+
+        /* Enhanced data table for overview */
+        .overview-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .overview-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .overview-table tr:hover {
+            background-color: #e8f4fd;
+        }
+
+        .overview-table td {
+            padding: 8px 12px;
+            border: none;
+            vertical-align: middle;
+        }
+
+        .overview-table .label-col {
+            text-align: right;
+            font-weight: 500;
+            color: #374151;
+            width: 50%;
+            padding-right: 16px;
+        }
+
+        .overview-table .value-col {
+            text-align: left;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-weight: 600;
+            color: #111827;
+            width: 50%;
+            padding-left: 8px;
+        }
+
+        /* Balance overview specific styling */
+        .balance-overview {
+            margin-bottom: 1rem;
+        }
+
+        .balance-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .balance-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .balance-table tr:hover {
+            background-color: #e8f4fd;
+        }
+
+        .balance-table td {
+            padding: 10px 16px;
+            border: none;
+            vertical-align: middle;
+        }
+
+        .balance-table .balance-label {
+            text-align: right;
+            font-weight: 500;
+            color: #374151;
+            width: 50%;
+            padding-right: 20px;
+        }
+
+        .balance-table .balance-value {
+            text-align: left;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-weight: 600;
+            color: #111827;
+            width: 50%;
+            padding-left: 12px;
+            font-size: 0.95rem;
+        }
+
+        .status-pill {
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            width: 160px;
+            text-align: center;
+        }
+
+        .overview-section {
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .overview-section>*+* {
+            margin-top: 0.5rem;
+        }
+
+        /* New styles for improved logs section */
+        .logs-container {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 10px;
+            height: 100%;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        .log-entry.error {
+            background-color: #ffe6e6;
+            color: #d32f2f;
+        }
+
+        .log-entry.warning {
+            background-color: #fff3e0;
+            color: #f57c00;
+        }
+
+        .log-entry.success {
+            background-color: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .log-timestamp {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .log-message {
+            word-break: break-word;
+        }
+
+        .truncate {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            background-color: #ffffff;
+            z-index: 10;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .resizable-logs {
+            width: 100%;
+            min-height: 150px;
+        }
+
+        .react-resizable-handle {
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2IDYiIHN0eWxlPSJiYWNrZ3JvdW5kLWNvbG9yOiNmZmZmZmYwMCIgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSI2cHgiIGhlaWdodD0iNnB4Ij48ZyBvcGFjaXR5PSIwLjMwMiI+PHBhdGggZD0iTSA2IDYgTCAwIDYgTCAwIDQuMiBMIDQgNC4yIEwgNC4yIDQuMiBMIDQuMiAwIEwgNiAwIEwgNiA2IEwgNiA2IFoiIGZpbGw9IiMwMDAwMDAiLz48L2c+PC9zdmc+');
+            background-position: bottom right;
+            background-repeat: no-repeat;
+            background-origin: content-box;
+            box-sizing: border-box;
+            cursor: se-resize;
+        }
+
+        .account-buttons-container {
+            margin-bottom: 1.5rem;
+            /* Add space below the buttons */
+        }
+
+        /* Trading mode radio buttons */
+        .trading-mode-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .trading-mode-option {
+            display: flex;
+            align-items: center;
+            margin: 0 0.5rem;
+        }
+
+        .trading-mode-option input[type="radio"] {
+            margin-right: 0.25rem;
+        }
+
+        .trading-mode-option label {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .trading-mode-option.normal label {
+            color: #3b82f6;
+        }
+
+        .trading-mode-option.buy-only label {
+            color: #10b981;
+        }
+
+        .trading-mode-option.sell-only label {
+            color: #ef4444;
+        }
+
+        /* Session toggle styles */
+        .session-toggle-container {
+            margin-top: 1rem;
+        }
+
+        .session-toggle-button {
+            position: relative;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .session-toggle {
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .session-toggle.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .session-toggle.inactive {
+            background-color: #e5e7eb;
+            color: #4b5563;
+        }
+
+        .help-icon {
+            position: absolute;
+            top: -0.25rem;
+            right: -0.25rem;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 9999px;
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.625rem;
+            font-weight: bold;
+            color: #6b7280;
+            cursor: help;
+        }
+
+        .session-tooltip {
+            position: absolute;
+            z-index: 50;
+            background-color: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            max-width: 16rem;
+        }
+
+        /* Tooltip styles */
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip-icon {
+            width: 16px;
+            height: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: #e5e7eb;
+            color: #4b5563;
+            font-size: 10px;
+            font-weight: bold;
+            margin-left: 4px;
+            cursor: help;
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip-container:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Slightly reduce button sizes */
+        .session-toggle {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        /* Exclusive mode toggle styles */
+        .exclusive-mode-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+            margin-left: 10px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.toggle-slider {
+            background-color: #3b82f6;
+        }
+
+        input:checked+.toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Webhook outcome row styling */
+        .webhook-rejected-row {
+            background-color: #fef3cd !important;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .webhook-error-row {
+            background-color: #fee2e2 !important;
+            border-left: 4px solid #ef4444;
+        }
+
+        /* Dashboard Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+            max-height: calc(100vh - 200px);
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                max-height: none;
+            }
+        }
+
+        /* Metric Cards */
+        .metric-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+        }
+
+        .metric-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+
+        /* Summary Cards */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+            text-align: center;
+        }
+
+        .summary-card-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .summary-card-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        /* Header improvements */
+        .dashboard-header {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            border: 1px solid #e5e7eb;
+            margin-bottom: 1rem;
+        }
+
+        /* Collapsible sections */
+        .collapsible-section {
+            background: white;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .collapsible-header {
+            padding: 0.75rem 1rem;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .collapsible-header:hover {
+            background: #f3f4f6;
+        }
+
+        .collapsible-content {
+            padding: 1rem;
+        }
+
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+
+        /* Dashboard Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+            max-height: calc(100vh - 200px);
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                max-height: none;
+            }
+        }
+
+        /* Metric Cards */
+        .metric-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+        }
+
+        .metric-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+
+        /* Summary Cards */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+            text-align: center;
+        }
+
+        .summary-card-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .summary-card-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        /* Header improvements */
+        .dashboard-header {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            border: 1px solid #e5e7eb;
+            margin-bottom: 1rem;
+        }
+
+        /* Collapsible sections */
+        .collapsible-section {
+            background: white;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .collapsible-header {
+            padding: 0.75rem 1rem;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .collapsible-header:hover {
+            background: #f3f4f6;
+        }
+
+        .collapsible-content {
+            padding: 1rem;
+        }
+
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+
+        /* Profit/Loss color coding */
+        .profit-positive {
+            color: #059669;
+            font-weight: 600;
+        }
+
+        .profit-negative {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-closed {
+            background: #f3f4f6;
+            color: #374151;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, useCallback, useRef } = React;
+        const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } = Recharts;
+
+        function formatDateToUTC(date) {
+            return new Date(date).toISOString().split('T')[0];
+        }
+
+        function formatDate(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        // --- Updated DateFilter Component ---
+        function DateFilter({ onFilterChange, initialStartDate, initialEndDate }) {
+            const [startDate, setStartDate] = React.useState(initialStartDate || (() => {
+                const today = new Date();
+                const dayOfWeek = today.getUTCDay();
+                const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                const monday = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - daysToMonday));
+                return formatDate(monday);
+            })());
+
+            const [endDate, setEndDate] = React.useState(initialEndDate || (() => {
+                // Create tomorrow's date to ensure today's trades are included
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                return formatDate(tomorrow);
+            })());
+
+            React.useEffect(() => {
+                // Only call onFilterChange if dates differ from initial props
+                if (startDate !== initialStartDate || endDate !== initialEndDate) {
+                    onFilterChange(startDate, endDate);
+                }
+            }, [startDate, endDate, initialStartDate, initialEndDate, onFilterChange]);
+
+            const handleFilter = () => {
+                onFilterChange(startDate, endDate);
+            };
+
+            return (
+                React.createElement('div', { className: 'flex items-center space-x-2' },
+                    React.createElement('input', {
+                        type: 'date',
+                        value: startDate,
+                        onChange: (e) => setStartDate(e.target.value),
+                        className: 'border rounded px-2 py-1'
+                    }),
+                    React.createElement('span', null, 'to'),
+                    React.createElement('input', {
+                        type: 'date',
+                        value: endDate,
+                        onChange: (e) => setEndDate(e.target.value),
+                        className: 'border rounded px-2 py-1'
+                    }),
+                    React.createElement('button', { onClick: handleFilter, className: 'bg-blue-500 text-white px-4 py-1 rounded' }, 'Filter')
+                )
+            );
+        }
+
+        function ExclusiveModeToggle({ selectedAccount, exclusiveMode, onExclusiveModeChange }) {
+            const handleToggle = () => {
+                onExclusiveModeChange(selectedAccount, !exclusiveMode);
+            };
+
+            return (
+                React.createElement('div', { className: 'mt-2' },
+                    React.createElement('h3', { className: 'text-md font-semibold text-gray-900 mb-2' }, 'Modo Exclusivo:'),
+                    React.createElement('div', { className: 'flex items-center' },
+                        React.createElement('span', { className: 'text-sm text-gray-700 mr-2' }, 'Um trade por vez'),
+                        React.createElement('label', { className: 'toggle-switch' },
+                            React.createElement('input', {
+                                type: 'checkbox',
+                                checked: exclusiveMode,
+                                onChange: handleToggle
+                            }),
+                            React.createElement('span', { className: 'toggle-slider' })
+                        )
+                    )
+                )
+            );
+        }
+
+        function TradingModeSelector({ selectedAccount, tradingMode, onTradingModeChange }) {
+            const handleModeChange = (mode) => {
+                onTradingModeChange(selectedAccount, mode);
+            };
+
+            return (
+                React.createElement('div', { className: 'flex space-x-2' },
+                    React.createElement('button', {
+                        className: tradingMode === 'NORMAL'
+                            ? 'px-3 py-1 rounded-md text-sm font-medium bg-blue-500 text-white'
+                            : 'px-3 py-1 rounded-md text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300',
+                        onClick: () => handleModeChange('NORMAL')
+                    }, 'NORMAL'),
+
+                    React.createElement('button', {
+                        className: tradingMode === 'BUY_ONLY'
+                            ? 'px-3 py-1 rounded-md text-sm font-medium bg-green-500 text-white'
+                            : 'px-3 py-1 rounded-md text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300',
+                        onClick: () => handleModeChange('BUY_ONLY')
+                    }, 'SÓ COMPRA'),
+
+                    React.createElement('button', {
+                        className: tradingMode === 'SELL_ONLY'
+                            ? 'px-3 py-1 rounded-md text-sm font-medium bg-red-500 text-white'
+                            : 'px-3 py-1 rounded-md text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300',
+                        onClick: () => handleModeChange('SELL_ONLY')
+                    }, 'SÓ VENDA')
+                )
+            );
+        }
+
+        // CollapsibleSection component for organizing content
+        function CollapsibleSection({ title, defaultOpen = true, children }) {
+            const [isOpen, setIsOpen] = useState(defaultOpen);
+
+            return React.createElement('div', { className: 'collapsible-section' },
+                React.createElement('div', {
+                    className: 'collapsible-header',
+                    onClick: () => setIsOpen(!isOpen)
+                },
+                    React.createElement('span', null, title),
+                    React.createElement('span', {
+                        className: `transform transition-transform ${isOpen ? 'rotate-180' : ''}`
+                    }, '▼')
+                ),
+                isOpen && React.createElement('div', { className: 'collapsible-content' }, children)
+            );
+        }
+        
+        // MetricCard component for displaying metrics
+        function MetricCard({ label, value, color }) {
+            const colorClasses = {
+                blue: 'text-blue-600',
+                green: 'text-green-600',
+                red: 'text-red-600',
+                gray: 'text-gray-600'
+            };
+
+            return React.createElement('div', { className: 'metric-card' },
+                React.createElement('div', { className: 'metric-label' }, label),
+                React.createElement('div', {
+                    className: `metric-value ${colorClasses[color] || 'text-gray-900'}`
+                }, value)
+            );
+        }
+
+        function TradingSessionToggles({ selectedAccount, sessionSettings, onToggleSession }) {
+            const [tooltipInfo, setTooltipInfo] = useState(null);
+
+            // Session time information
+            const sessionTimeInfo = {
+                asia_session: {
+                    name: "ASIA",
+                    et: "14:00 - 00:00 ET",
+                    brt: "17:00 - 03:00 BRT",
+                    description: "Asian markets active. Lower volatility, good for range trading."
+                },
+                london_session: {
+                    name: "LONDON",
+                    et: "00:00 - 08:00 ET",
+                    brt: "03:00 - 11:00 BRT",
+                    description: "European markets open. Higher volatility, trend movements."
+                },
+                new_york_session: {
+                    name: "NEW YORK",
+                    et: "06:00 - 14:00 ET",
+                    brt: "09:00 - 17:00 BRT",
+                    description: "US markets active. Highest liquidity and volatility."
+                },
+                limbo_session: {
+                    name: "LIMBO (GBPUSD)",
+                    et: "21:00 - 05:00 ET",
+                    brt: "23:00 - 05:00 BRT",
+                    description: "Transition period. Lower liquidity, unpredictable movements."
+                }
+            };
+
+            const showTooltip = (session, event) => {
+                event.stopPropagation();
+                setTooltipInfo({
+                    session,
+                    x: event.clientX,
+                    y: event.clientY
+                });
+            };
+
+            const hideTooltip = () => {
+                setTooltipInfo(null);
+            };
+
+            useEffect(() => {
+                // Add click outside listener to close tooltip
+                if (tooltipInfo) {
+                    const handleClickOutside = (event) => {
+                        if (!event.target.closest(".session-tooltip") && !event.target.closest(".help-icon")) {
+                            hideTooltip();
+                        }
+                    };
+
+                    document.addEventListener("click", handleClickOutside);
+                    return () => {
+                        document.removeEventListener("click", handleClickOutside);
+                    };
+                }
+            }, [tooltipInfo]);
+
+            const handleToggle = (session) => {
+                onToggleSession(selectedAccount, session, !sessionSettings[session]);
+            };
+
+            return (
+                React.createElement('div', { className: 'mt-1' },
+                    React.createElement('div', { className: 'flex flex-wrap' },
+                        Object.keys(sessionTimeInfo).map(session =>
+                            React.createElement('div', { key: session, className: 'session-toggle-button' },
+                                React.createElement('button', {
+                                    className: `session-toggle ${sessionSettings[session] ? 'active' : 'inactive'}`,
+                                    onClick: () => handleToggle(session)
+                                }, sessionTimeInfo[session].name),
+                                React.createElement('div', {
+                                    className: 'help-icon',
+                                    onClick: (e) => showTooltip(session, e)
+                                }, '?')
+                            )
+                        )
+                    ),
+                    tooltipInfo && React.createElement('div', {
+                        className: 'session-tooltip',
+                        style: {
+                            top: `${tooltipInfo.y + 10}px`,
+                            left: `${tooltipInfo.x + 10}px`
+                        }
+                    },
+                        React.createElement('h4', { className: 'font-bold text-lg mb-2' }, sessionTimeInfo[tooltipInfo.session].name + ' Session'),
+                        React.createElement('p', { className: 'mb-1' },
+                            React.createElement('span', { className: 'font-semibold' }, 'ET: '),
+                            sessionTimeInfo[tooltipInfo.session].et
+                        ),
+                        React.createElement('p', { className: 'mb-1' },
+                            React.createElement('span', { className: 'font-semibold' }, 'BRT: '),
+                            sessionTimeInfo[tooltipInfo.session].brt
+                        ),
+                        React.createElement('p', { className: 'text-sm text-gray-600 mb-2' }, sessionTimeInfo[tooltipInfo.session].description),
+                        React.createElement('button', {
+                            className: 'px-2 py-1 bg-gray-100 text-gray-800 rounded text-sm',
+                            onClick: hideTooltip
+                        }, 'Close')
+                    )
+                )
+            );
+        }
+
+        function Table({ data, columns, tabName, selectedAccount }) {
+            const [sortConfig, setSortConfig] = useState({ key: 'id', direction: 'descending' });
+            const [currentPage, setCurrentPage] = useState(1);
+            const [searchTerm, setSearchTerm] = useState('');
+            const itemsPerPage = 20;
+
+            const filteredAndSortedData = useMemo(() => {
+                let filteredData = [...data];
+
+                // Apply search filter
+                if (searchTerm) {
+                    filteredData = filteredData.filter(row =>
+                        Object.values(row).some(value =>
+                            value && value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+                        )
+                    );
+                }
+
+                // Apply sorting
+                if (sortConfig.key !== null) {
+                    filteredData.sort((a, b) => {
+                        if (a[sortConfig.key] < b[sortConfig.key]) {
+                            return sortConfig.direction === 'ascending' ? -1 : 1;
+                        }
+                        if (a[sortConfig.key] > b[sortConfig.key]) {
+                            return sortConfig.direction === 'ascending' ? 1 : -1;
+                        }
+                        return 0;
+                    });
+                }
+
+                return filteredData;
+            }, [data, sortConfig, searchTerm]);
+
+            const paginatedData = useMemo(() => {
+                const startIndex = (currentPage - 1) * itemsPerPage;
+                return filteredAndSortedData.slice(startIndex, startIndex + itemsPerPage);
+            }, [filteredAndSortedData, currentPage]);
+
+            const totalPages = Math.ceil(filteredAndSortedData.length / itemsPerPage);
+
+            const requestSort = (key) => {
+                let direction = 'ascending';
+                if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+                    direction = 'descending';
+                }
+                setSortConfig({ key, direction });
+            };
+
+            return (
+                React.createElement('div', { className: 'overflow-x-auto' },
+                    React.createElement('div', { className: 'flex justify-between items-center mb-4' },
+                        React.createElement('h3', { className: 'text-lg font-semibold' }, tabName),
+                        React.createElement('div', { className: 'flex gap-2' },
+                            React.createElement('button', {
+                                onClick: () => exportData(data, `${tabName.replace(' ', '_')}.csv`, 'csv', selectedAccount),
+                                className: 'px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600'
+                            }, 'Export CSV'),
+                            React.createElement('button', {
+                                onClick: () => exportData(data, `${tabName.replace(' ', '_')}.xlsx`, 'xlsx', selectedAccount),
+                                className: 'px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600'
+                            }, 'Export Excel')
+                        )
+                    ),
+
+                    // Search and pagination controls
+                    React.createElement('div', { className: 'flex justify-between items-center mb-4' },
+                        React.createElement('input', {
+                            type: 'text',
+                            placeholder: 'Search orders...',
+                            value: searchTerm,
+                            onChange: (e) => {
+                                setSearchTerm(e.target.value);
+                                setCurrentPage(1); // Reset to first page when searching
+                            },
+                            className: 'px-3 py-2 border border-gray-300 rounded-md w-64'
+                        }),
+                        React.createElement('div', { className: 'flex items-center space-x-2' },
+                            React.createElement('span', { className: 'text-sm text-gray-600' },
+                                `Showing ${((currentPage - 1) * itemsPerPage) + 1}-${Math.min(currentPage * itemsPerPage, filteredAndSortedData.length)} of ${filteredAndSortedData.length}`
+                            ),
+                            React.createElement('button', {
+                                onClick: () => setCurrentPage(p => Math.max(1, p - 1)),
+                                disabled: currentPage === 1,
+                                className: 'px-3 py-1 bg-gray-200 rounded disabled:opacity-50 hover:bg-gray-300'
+                            }, 'Previous'),
+                            React.createElement('span', { className: 'text-sm text-gray-600' },
+                                `Page ${currentPage} of ${totalPages}`
+                            ),
+                            React.createElement('button', {
+                                onClick: () => setCurrentPage(p => Math.min(totalPages, p + 1)),
+                                disabled: currentPage >= totalPages,
+                                className: 'px-3 py-1 bg-gray-200 rounded disabled:opacity-50 hover:bg-gray-300'
+                            }, 'Next')
+                        )
+                    ),
+                    React.createElement('table', { className: 'min-w-full divide-y divide-gray-200 data-table' },
+                        React.createElement('thead', { className: 'bg-gray-50' },
+                            React.createElement('tr', null,
+                                columns.map((column) => (
+                                    React.createElement('th', {
+                                        key: column.key,
+                                        onClick: () => requestSort(column.key),
+                                        className: 'px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
+                                    },
+                                        column.label,
+                                        sortConfig.key === column.key && (
+                                            React.createElement('span', null, sortConfig.direction === 'ascending' ? ' 🔼' : ' 🔽')
+                                        )
+                                    )
+                                ))
+                            )
+                        ),
+                        React.createElement('tbody', { className: 'bg-white divide-y divide-gray-200' },
+                            paginatedData.map((row, rowIndex) => (
+                                React.createElement(
+                                    'tr',
+                                    {
+                                        key: rowIndex,
+                                        className:
+                                            row.isWebhookOutcome && row.status === 'REJECTED'
+                                                ? 'webhook-rejected-row'
+                                                : row.isWebhookOutcome && row.status === 'ERROR'
+                                                    ? 'webhook-error-row'
+                                                    : Math.abs(row.closePrice - row.stopLoss) <= 0.00005
+                                                        ? 'bg-red-100'
+                                                        : Math.abs(row.closePrice - row.takeProfit) <= 0.00005
+                                                            ? 'bg-green-100'
+                                                            : '',
+                                    },
+                                    columns.map((column) => {
+                                        let cellValue = column.key === 'maxSize'
+                                            ? row.maxSize || 'N/A'
+                                            : column.render
+                                                ? column.render(row)
+                                                : row[column.key] != null
+                                                    ? row[column.key]
+                                                    : 'N/A';
+
+                                        // Add color coding for profit/loss columns
+                                        let cellClass = 'px-3 py-2 whitespace-nowrap text-sm';
+                                        if (column.key === 'profit' && row.profit != null) {
+                                            cellClass += parseFloat(row.profit) >= 0 ? ' profit-positive' : ' profit-negative';
+                                        }
+                                        if (column.key === 'status' && row.status) {
+                                            cellClass += row.status === 'ACTIVE' ? ' status-active' : ' status-closed';
+                                            cellValue = React.createElement('span', { className: row.status === 'ACTIVE' ? 'status-active' : 'status-closed' }, row.status);
+                                        }
+
+                                        return React.createElement('td', { key: column.key, className: cellClass }, cellValue);
+                                    })
+                                )
+                            ))
+                        )
+                    )
+                )
+            );
+        }
+
+        function DailyPnLChart({ data }) {
+            if (!data || data.length === 0) {
+                return React.createElement('div', {
+                    className: 'text-center text-gray-500 py-8'
+                }, 'No P&L data available');
+            }
+
+            const sortedData = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
+            const startDate = sortedData[0]?.date;
+            const endDate = sortedData[sortedData.length - 1]?.date;
+
+            return React.createElement('div', { className: 'h-64 w-full' },
+                React.createElement(ResponsiveContainer, { width: '100%', height: '100%' },
+                    React.createElement(BarChart, { data: sortedData, margin: { top: 10, right: 10, left: 40, bottom: 0 } },
+                        React.createElement(CartesianGrid, { strokeDasharray: '3 3', vertical: false, stroke: '#f0f0f0' }),
+                        React.createElement(XAxis, {
+                            dataKey: 'date',
+                            tickFormatter: (date) => new Date(date).toUTCString().split(' ').slice(1, 4).join(' '),
+                            domain: [startDate, endDate],
+                            type: 'category',
+                            stroke: '#6b7280',
+                            fontSize: 12
+                        }),
+                        React.createElement(YAxis, {
+                            stroke: '#6b7280',
+                            fontSize: 12,
+                            tickFormatter: (value) => `${value > 0 ? '+' : ''}${value.toFixed(2)}`
+                        }),
+                        React.createElement(Tooltip, {
+                            formatter: (value) => [`${value.toFixed(2)}`, 'P&L'],
+                            labelFormatter: (date) => new Date(date).toUTCString().split(' ').slice(0, 4).join(' '),
+                            contentStyle: {
+                                backgroundColor: '#fff',
+                                border: '1px solid #e5e7eb',
+                                borderRadius: '4px',
+                                padding: '8px'
+                            }
+                        }),
+                        React.createElement(Bar, {
+                            dataKey: 'pnl',
+                            fill: (entry) => entry.fill // Use the precomputed color
+                        })
+                    )
+                )
+            )};
+
+
+            // Summary Cards Component
+            function SummaryCards({ activeOrders, closedOrders, pnl, unrealizedPnL }) {
+                // Removed console.log
+                const winningTrades = closedOrders.filter(o => parseFloat(o.profit) > 0).length;
+                const losingTrades = closedOrders.filter(o => parseFloat(o.profit) < 0).length;
+
+                return React.createElement('div', { className: 'summary-cards' },
+                    React.createElement('div', { className: 'summary-card' },
+                        React.createElement('div', {
+                            className: 'summary-card-value text-blue-600'
+                        }, activeOrders.length),
+                        React.createElement('div', { className: 'summary-card-label' }, 'Active Orders')
+                    ),
+                    React.createElement('div', { className: 'summary-card' },
+                        React.createElement('div', {
+                            className: 'summary-card-value text-green-600'
+                        }, winningTrades),
+                        React.createElement('div', { className: 'summary-card-label' }, 'Winning Trades')
+                    ),
+                    React.createElement('div', { className: 'summary-card' },
+                        React.createElement('div', {
+                            className: 'summary-card-value text-red-600'
+                        }, losingTrades),
+                        React.createElement('div', { className: 'summary-card-label' }, 'Losing Trades')
+                    ),
+                    React.createElement('div', { className: 'summary-card' },
+                        React.createElement('div', {
+                            className: `summary-card-value ${(pnl || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`
+                        }, `$${(pnl || 0).toFixed(2)}`),
+                        React.createElement('div', { className: 'summary-card-label' }, 'Total P&L')
+                    )
+                );
+            }
+
+
+
+            // Enhanced LogMessage component with better expand/collapse functionality
+            function LogMessage({ message }) {
+                const [isExpanded, setIsExpanded] = useState(false);
+                const toggleExpand = () => setIsExpanded(!isExpanded);
+
+                // Maximum length before truncating
+                const MAX_LENGTH = 120;
+
+                if (!message || message.length <= MAX_LENGTH) {
+                    return React.createElement('span', { className: 'log-message' }, message);
+                }
+
+                return (
+                    React.createElement('span', { className: 'log-message' },
+                        isExpanded ? message : `${message.slice(0, MAX_LENGTH)}...`,
+                        React.createElement('button', {
+                            onClick: toggleExpand,
+                            className: 'ml-2 text-xs text-blue-600 hover:text-blue-800 font-medium'
+                        }, isExpanded ? 'Show Less' : 'Show More')
+                    )
+                );
+            }
+
+            // LogsTab component for the logs tab
+            function LogsTab({ selectedAccount }) {
+                const [logs, setLogs] = useState([]);
+                const [loading, setLoading] = useState(false);
+                const [error, setError] = useState(null);
+                const [logSource, setLogSource] = useState('trades');
+                const [filterText, setFilterText] = useState('');
+                const [autoScroll, setAutoScroll] = useState(true);
+                const logsContainerRef = useRef(null);
+
+                // Fetch logs function
+                const fetchLogs = useCallback(async () => {
+                    if (!selectedAccount) return;
+
+                    setLoading(true);
+                    setError(null);
+
+                    try {
+                        const response = await fetch(`/api/recent-logs?account=${selectedAccount}&type=${logSource}&limit=100&t=${Date.now()}`);
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        const data = await response.json();
+                        console.log('📋 Fetched logs:', data.length, 'entries');
+                        console.log('📋 Raw API - First log time:', data[0]?.time);
+                        console.log('📋 Raw API - Last log time:', data[data.length - 1]?.time);
+                        console.log('📋 Raw API - First log message:', data[0]?.message?.substring(0, 50));
+                        console.log('📋 Raw API - Last log message:', data[data.length - 1]?.message?.substring(0, 50));
+                        setLogs(data);
+                    } catch (err) {
+                        console.error('❌ Error fetching logs:', err);
+                        setError(err.message);
+                        setLogs([]);
+                    } finally {
+                        setLoading(false);
+                    }
+                }, [selectedAccount, logSource]);
+
+                // Auto-fetch logs when account or source changes
+                useEffect(() => {
+                    fetchLogs();
+                    const interval = setInterval(fetchLogs, 10000); // Refresh every 10 seconds
+                    return () => clearInterval(interval);
+                }, [fetchLogs]);
+
+                // Initial scroll to bottom when logs are first loaded
+                useEffect(() => {
+                    if (logs.length > 0 && autoScroll && logsContainerRef.current) {
+                        setTimeout(() => {
+                            if (logsContainerRef.current) {
+                                logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
+                            }
+                        }, 200);
+                    }
+                }, [logs.length]);
+
+                // Auto-scroll to bottom when new logs arrive
+                useEffect(() => {
+                    if (autoScroll && logsContainerRef.current) {
+                        // Small delay to ensure DOM is updated
+                        setTimeout(() => {
+                            if (logsContainerRef.current) {
+                                const container = logsContainerRef.current;
+                                container.scrollTop = container.scrollHeight;
+                                console.log('📋 Auto-scrolled to bottom. ScrollTop:', container.scrollTop, 'ScrollHeight:', container.scrollHeight);
+                            }
+                        }, 100);
+                    }
+                }, [logs, autoScroll, filteredLogs]);
+
+                // Determine log type for styling
+                const getLogType = (message) => {
+                    if (!message) return '';
+                    const lowerMessage = message.toLowerCase();
+
+                    if (lowerMessage.includes('error') ||
+                        lowerMessage.includes('order rejected') ||
+                        lowerMessage.includes('cannot place trade')) {
+                        return 'error';
+                    }
+
+                    if (lowerMessage.includes('warning') ||
+                        lowerMessage.includes('order limit reached') ||
+                        lowerMessage.includes('only one order per side allowed') ||
+                        lowerMessage.includes('order rejected due to trading mode')) {
+                        return 'warning';
+                    }
+
+                    if (lowerMessage.includes('success') ||
+                        lowerMessage.includes('trade placed successfully')) {
+                        return 'success';
+                    }
+
+                    return '';
+                };
+
+                // Filter logs by search text - API returns newest first, we want newest at bottom
+                const filteredLogs = useMemo(() => {
+                    let filtered = logs;
+                    if (filterText) {
+                        filtered = logs.filter(log =>
+                            log.message.toLowerCase().includes(filterText.toLowerCase()) ||
+                            log.time.toLowerCase().includes(filterText.toLowerCase())
+                        );
+                    }
+                    // Reverse the array so newest logs appear at bottom (API gives newest first)
+                    const reversed = [...filtered].reverse();
+                    console.log('📋 Reversed logs - First (oldest):', reversed[0]?.time, 'Last (newest):', reversed[reversed.length - 1]?.time);
+                    return reversed;
+                }, [logs, filterText]);
+
+                return React.createElement('div', { className: 'data-card p-6' },
+                    // Header
+                    React.createElement('h2', { className: 'text-xl font-semibold mb-4' },
+                        `Logs - Account ${selectedAccount}`
+                    ),
+
+                    // Controls
+                    React.createElement('div', { className: 'mb-4 flex flex-wrap gap-4 items-center' },
+                        // Log source selector
+                        React.createElement('div', { className: 'flex items-center gap-2' },
+                            React.createElement('label', { className: 'text-sm font-medium text-gray-700' }, 'Source:'),
+                            React.createElement('select', {
+                                value: logSource,
+                                onChange: (e) => setLogSource(e.target.value),
+                                className: 'px-3 py-1 border border-gray-300 rounded-md text-sm'
+                            },
+                                React.createElement('option', { value: 'trades' }, 'Trades'),
+                                React.createElement('option', { value: 'error' }, 'Errors')
+                            )
+                        ),
+
+                        // Filter input
+                        React.createElement('div', { className: 'flex items-center gap-2' },
+                            React.createElement('label', { className: 'text-sm font-medium text-gray-700' }, 'Filter:'),
+                            React.createElement('input', {
+                                type: 'text',
+                                placeholder: 'Search logs...',
+                                value: filterText,
+                                onChange: (e) => setFilterText(e.target.value),
+                                className: 'px-3 py-1 border border-gray-300 rounded-md text-sm w-48'
+                            })
+                        ),
+
+                        // Auto-scroll toggle
+                        React.createElement('button', {
+                            onClick: () => setAutoScroll(!autoScroll),
+                            className: `px-3 py-1 text-sm font-medium rounded-md ${autoScroll ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                }`
+                        }, autoScroll ? 'Auto-scroll ON' : 'Auto-scroll OFF'),
+
+                        // Manual refresh button
+                        React.createElement('button', {
+                            onClick: () => {
+                                console.log('🔄 Manual refresh clicked');
+                                fetchLogs();
+                            },
+                            disabled: loading,
+                            className: 'px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 disabled:opacity-50'
+                        }, loading ? 'Loading...' : 'Refresh')
+                    ),
+
+                    // Status
+                    React.createElement('div', { className: 'mb-4 text-sm text-gray-600 flex justify-between' },
+                        React.createElement('span', null,
+                            loading ? 'Loading logs...' :
+                                error ? `Error: ${error}` :
+                                    `Account: ${selectedAccount} | Showing ${filteredLogs.length} of ${logs.length} logs`
+                        ),
+                        React.createElement('span', { className: 'text-xs' },
+                            `Type: ${logSource.toUpperCase()}`
+                        )
+                    ),
+
+                    // Logs container
+                    React.createElement('div', {
+                        className: 'logs-container border border-gray-300 rounded-md p-4 bg-gray-50',
+                        style: {
+                            height: '500px',
+                            overflowY: 'auto',
+                            fontFamily: 'Monaco, "Lucida Console", monospace',
+                            fontSize: '13px'
+                        },
+                        ref: logsContainerRef
+                    },
+                        filteredLogs.length === 0 ?
+                            React.createElement('div', { className: 'text-gray-500 text-center py-8' },
+                                error ? '❌ Failed to load logs' :
+                                    loading ? '⏳ Loading logs...' :
+                                        logs.length === 0 ? '📝 No logs found for this account' :
+                                            '🔍 No logs match current filter'
+                            ) :
+                            // Show logs in chronological order (oldest first, newest at bottom)
+                            filteredLogs.map((log, index) => {
+                                const logType = getLogType(log.message);
+                                return React.createElement('div', {
+                                    key: index,
+                                    className: `log-entry mb-2 p-2 rounded border-l-4 ${logType === 'error' ? 'bg-red-50 border-red-400 text-red-800' :
+                                        logType === 'warning' ? 'bg-yellow-50 border-yellow-400 text-yellow-800' :
+                                            logType === 'success' ? 'bg-green-50 border-green-400 text-green-800' :
+                                                'bg-white border-gray-300 text-gray-800'
+                                        }`
+                                },
+                                    React.createElement('div', { className: 'flex items-start gap-2' },
+                                        React.createElement('span', {
+                                            className: 'font-bold text-xs text-gray-500 whitespace-nowrap min-w-[130px]'
+                                        }, log.time),
+                                        log.account && React.createElement('span', {
+                                            className: 'text-xs bg-blue-100 text-blue-800 px-1 rounded font-mono'
+                                        }, `[${log.account}]`),
+                                        React.createElement('span', {
+                                            className: 'flex-1 break-words leading-relaxed'
+                                        }, log.message)
+                                    )
+                                );
+                            })
+                    )
+                );
+            }
+
+            function StatisticsTab({ selectedAccount, dateRange }) {
+                const [statistics, setStatistics] = useState(null);
+                const [loading, setLoading] = useState(false);
+                const [error, setError] = useState(null);
+                const [dateFilter, setDateFilter] = useState({
+                    start: (() => {
+                        const date = new Date();
+                        date.setDate(date.getDate() - 30);
+                        return formatDate(date);
+                    })(),
+                    end: formatDate(new Date()),
+                });
+
+                // Helper function to render a label with a tooltip
+                const renderLabelWithTooltip = (label, explanation) => {
+                    return React.createElement(
+                        "div",
+                        {
+                            className: "flex items-center"
+                        },
+                        React.createElement("span", { className: "mr-1" }, label),
+                        React.createElement(
+                            "div",
+                            {
+                                className:
+                                    "relative inline-block cursor-help",
+                            },
+                            React.createElement(
+                                "span",
+                                {
+                                    className:
+                                        "w-4 h-4 inline-flex items-center justify-content-center rounded-full bg-gray-200 text-gray-600 text-xs font-bold",
+                                    title: explanation,
+                                },
+                                "?"
+                            )
+                        )
+                    );
+                };
+
+                const loadStatistics = async () => {
+                    try {
+                        setLoading(true);
+                        setError(null);
+
+                        // Construct the URL with query parameters
+                        const url = `/api/statistics/${selectedAccount}?startDate=${dateFilter.start}&endDate=${dateFilter.end}`;
+                        const response = await fetch(url);
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const data = await response.json();
+                        console.log("Statistics data received:", data); // Debug log
+                        setStatistics(data);
+                    } catch (err) {
+                        console.error("Error fetching statistics:", err);
+                        setError(err.message);
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+
+                const handleDateChange = (start, end) => {
+                    setDateFilter({ start, end });
+                };
+
+                const formatCurrency = (value) => {
+                    // Add null check
+                    if (value === undefined || value === null) return "$0.00";
+                    return new Intl.NumberFormat("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                    }).format(value);
+                };
+
+                const formatPercent = (value) => {
+                    // Add null check
+                    if (value === undefined || value === null) return "0.00%";
+                    return new Intl.NumberFormat("en-US", {
+                        style: "percent",
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                    }).format(value / 100);
+                };
+
+                const formatDuration = (minutes) => {
+                    // Add null check
+                    if (minutes === undefined || minutes === null) return "0 min";
+
+                    if (minutes < 60) {
+                        return `${minutes} min`;
+                    } else if (minutes < 1440) {
+                        const hours = Math.floor(minutes / 60);
+                        const mins = minutes % 60;
+                        return `${hours}h ${mins}m`;
+                    } else {
+                        const days = Math.floor(minutes / 1440);
+                        const hours = Math.floor((minutes % 1440) / 60);
+                        return `${days}d ${hours}h`;
+                    }
+                };
+
+                const formatNumber = (value, decimals = 2) => {
+                    // Add null check
+                    if (value === undefined || value === null) return "0.00";
+                    return Number(value).toFixed(decimals);
+                };
+
+                const formatMonth = (monthStr) => {
+                    if (!monthStr) return "Unknown";
+                    try {
+                        const [year, month] = monthStr.split("-");
+                        const date = new Date(Number.parseInt(year), Number.parseInt(month) - 1, 1);
+                        return date.toLocaleDateString("en-US", { year: "numeric", month: "short" });
+                    } catch (e) {
+                        console.error("Error formatting month:", e);
+                        return monthStr || "Unknown";
+                    }
+                };
+
+                // Helper function to safely access nested properties
+                const safeGet = (obj, path, defaultValue = 0) => {
+                    try {
+                        const result = path.split(".").reduce((o, p) => o && o[p], obj);
+                        return result !== undefined && result !== null ? result : defaultValue;
+                    } catch (e) {
+                        return defaultValue;
+                    }
+                };
+
+                return React.createElement(
+                    "div",
+                    { className: "data-card p-6" },
+                    React.createElement(
+                        "h2",
+                        { className: "text-xl font-semibold mb-4" },
+                        `Trading Statistics (Account ${selectedAccount})`
+                    ),
+
+                    // Date filter and load button
+                    React.createElement(
+                        "div",
+                        { className: "flex justify-between items-center mb-6" },
+                        React.createElement(
+                            "div",
+                            { className: "flex items-center space-x-2" },
+                            React.createElement("input", {
+                                type: "date",
+                                value: dateFilter.start,
+                                onChange: (e) => setDateFilter((prev) => ({ ...prev, start: e.target.value })),
+                                className: "border rounded px-2 py-1",
+                            }),
+                            React.createElement("span", null, "to"),
+                            React.createElement("input", {
+                                type: "date",
+                                value: dateFilter.end,
+                                onChange: (e) => setDateFilter((prev) => ({ ...prev, end: e.target.value })),
+                                className: "border rounded px-2 py-1",
+                            })
+                        ),
+                        React.createElement(
+                            "button",
+                            {
+                                onClick: loadStatistics,
+                                disabled: loading,
+                                className: "bg-blue-500 text-white px-4 py-2 rounded flex items-center",
+                            },
+                            loading &&
+                            React.createElement("span", {
+                                className: "inline-block w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin",
+                            }),
+                            loading ? "Loading..." : "Load Statistics"
+                        )
+                    ),
+
+                    // Loading state
+                    loading &&
+                    React.createElement(
+                        "div",
+                        { className: "text-center py-8" },
+                        React.createElement("div", {
+                            className:
+                                "inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4",
+                        }),
+                        React.createElement("p", { className: "text-gray-600" }, "Loading statistics from SimpleFX API...")
+                    ),
+
+                    // Error state
+                    !loading &&
+                    error &&
+                    React.createElement(
+                        "div",
+                        { className: "text-center py-8 text-red-600" },
+                        React.createElement("p", null, `Error: ${error}`),
+                        React.createElement(
+                            "button",
+                            {
+                                onClick: loadStatistics,
+                                className: "mt-4 bg-blue-500 text-white px-4 py-2 rounded",
+                            },
+                            "Try Again"
+                        )
+                    ),
+
+                    // No data state
+                    !loading &&
+                    !error &&
+                    !statistics &&
+                    React.createElement(
+                        "div",
+                        { className: "text-center py-8 text-gray-600" },
+                        React.createElement(
+                            "p",
+                            null,
+                            'Clique em "Load Statistics" para carregar estatísticas de trading da API SimpleFX.'
+                        )
+                    ),
+
+                    // Statistics content
+                    !loading &&
+                    !error &&
+                    statistics &&
+                    React.createElement(
+                        "div",
+                        null,
+                        // Overall Performance Metrics
+                        React.createElement(
+                            "div",
+                            { className: "mb-8" },
+                            React.createElement(
+                                "h3",
+                                { className: "text-lg font-medium mb-4 pb-2 border-b border-gray-200" },
+                                "Overall Performance"
+                            ),
+                            React.createElement(
+                                "div",
+                                { className: "grid grid-cols-1 md:grid-cols-4 gap-4" },
+                                // Total P&L
+                                React.createElement(
+                                    "div",
+                                    { className: "bg-white p-4 rounded-lg shadow-sm border border-gray-200" },
+                                    React.createElement(
+                                        "div",
+                                        { className: "text-sm text-gray-500 mb-1" },
+                                        renderLabelWithTooltip(
+                                            "Total P&L",
+                                            "Lucro ou Prejuízo Total: Soma de todos os ganhos e perdas das operações."
+                                        )
+                                    ),
+                                    React.createElement(
+                                        "div",
+                                        {
+                                            className: `text-2xl font-bold ${safeGet(statistics, "total.pnl", 0) >= 0 ? "text-green-600" : "text-red-600"}`,
+                                        },
+                                        formatCurrency(safeGet(statistics, "total.pnl"))
+                                    )
+                                ),
+
+                                // Win Rate
+                                React.createElement(
+                                    "div",
+                                    { className: "bg-white p-4 rounded-lg shadow-sm border border-gray-200" },
+                                    React.createElement(
+                                        "div",
+                                        { className: "text-sm text-gray-500 mb-1" },
+                                        renderLabelWithTooltip(
+                                            "Win Rate",
+                                            "Taxa de Acerto: Porcentagem de operações lucrativas em relação ao total."
+                                        )
+                                    ),
+                                    React.createElement(
+                                        "div",
+                                        { className: "text-2xl font-bold text-blue-600" },
+                                        formatPercent(safeGet(statistics, "total.winRate"))
+                                    )
+                                ),
+
+                                // Profit Factor
+                                React.createElement(
+                                    "div",
+                                    { className: "bg-white p-4 rounded-lg shadow-sm border border-gray-200" },
+                                    React.createElement(
+                                        "div",
+                                        { className: "text-sm text-gray-500 mb-1" },
+                                        renderLabelWithTooltip(
+                                            "Profit Factor",
+                                            "Fator de Lucro: Relação entre o total de lucros e o total de perdas. Valores acima de 1 indicam lucratividade."
+                                        )
+                                    ),
+                                    React.createElement(
+                                        "div",
+                                        { className: "text-2xl font-bold text-blue-600" },
+                                        formatNumber(safeGet(statistics, "total.profitFactor"))
+                                    )
+                                ),
+
+                                // Max Drawdown
+                                React.createElement(
+                                    "div",
+                                    { className: "bg-white p-4 rounded-lg shadow-sm border border-gray-200" },
+                                    React.createElement(
+                                        "div",
+                                        { className: "text-sm text-gray-500 mb-1" },
+                                        renderLabelWithTooltip(
+                                            "Max Drawdown",
+                                            "Máxima Queda: A maior perda acumulada do pico ao vale. Indica o risco máximo histórico da estratégia."
+                                        )
+                                    ),
+                                    React.createElement(
+                                        "div",
+                                        { className: "text-2xl font-bold text-red-600" },
+                                        formatCurrency(safeGet(statistics, "total.maxDrawdown"))
+                                    )
+                                ),
+
+                                // Total Trades
+                                React.createElement(
+                                    "div",
+                                    { className: "bg-white p-4 rounded-lg shadow-sm border border-gray-200" },
+                                    React.createElement(
+                                        "div",
+                                        { className: "text-sm text-gray-500 mb-1" },
+                                        renderLabelWithTooltip(
+                                            "Total Trades",
+                                            "Total de Operações: Número total de operações realizadas no período."
+                                        )
+                                    ),
+                                    React.createElement(
+                                        "div",
+                                        { className: "text-2xl font-bold text-gray-800" },
+                                        safeGet(statistics, "total.orders", 0)
+                                    )
+                                ),
+
+                                // Average Trade Duration
+                                React.createElement(
+                                    "div",
+                                    { className: "bg-white p-4 rounded-lg shadow-sm border border-gray-200" },
+                                    React.createElement(
+                                        "div",
+                                        { className: "text-sm text-gray-500 mb-1" },
+                                        renderLabelWithTooltip(
+                                            "Avg Trade Duration",
+                                            "Duração Média: Tempo médio que as operações ficaram abertas."
+                                        )
+                                    ),
+                                    React.createElement(
+                                        "div",
+                                        { className: "text-2xl font-bold text-gray-800" },
+                                        formatDuration(safeGet(statistics, "total.avgDuration"))
+                                    )
+                                ),
+
+                                // Risk-Reward Ratio
+                                React.createElement(
+                                    "div",
+                                    { className: "bg-white p-4 rounded-lg shadow-sm border border-gray-200" },
+                                    React.createElement(
+                                        "div",
+                                        { className: "text-sm text-gray-500 mb-1" },
+                                        renderLabelWithTooltip(
+                                            "Risk-Reward Ratio",
+                                            "Relação Risco-Retorno: Proporção entre o ganho médio das operações lucrativas e a perda média das operações perdedoras."
+                                        )
+                                    ),
+                                    React.createElement(
+                                        "div",
+                                        { className: "text-2xl font-bold text-gray-800" },
+                                        formatNumber(safeGet(statistics, "total.riskRewardRatio"))
+                                    )
+                                ),
+
+                                // Standard Deviation
+                                React.createElement(
+                                    "div",
+                                    { className: "bg-white p-4 rounded-lg shadow-sm border border-gray-200" },
+                                    React.createElement(
+                                        "div",
+                                        { className: "text-sm text-gray-500 mb-1" },
+                                        renderLabelWithTooltip(
+                                            "Std Deviation",
+                                            "Desvio Padrão: Medida da volatilidade dos resultados. Quanto maior, mais inconsistentes são os resultados."
+                                        )
+                                    ),
+                                    React.createElement(
+                                        "div",
+                                        { className: "text-2xl font-bold text-gray-800" },
+                                        formatCurrency(safeGet(statistics, "total.stdDeviation"))
+                                    )
+                                ),
+
+                                // Add UPI card here
+                                React.createElement(
+                                    "div",
+                                    { className: "bg-white p-4 rounded-lg shadow-sm border border-gray-200" },
+                                    React.createElement(
+                                        "div",
+                                        { className: "text-sm text-gray-500 mb-1" },
+                                        renderLabelWithTooltip(
+                                            "UPI",
+                                            "Ulcer Performance Index: Métrica de desempenho ajustada ao risco que considera a profundidade e duração dos drawdowns. Valores mais altos indicam melhor retorno por unidade de risco de drawdown."
+                                        )
+                                    ),
+                                    React.createElement(
+                                        "div",
+                                        { className: "text-2xl font-bold text-blue-600" },
+                                        formatNumber(safeGet(statistics, "total.upi"))
+                                    )
+                                ),
+                                React.createElement(
+                                    "div",
+                                    { className: "bg-white p-4 rounded-lg shadow-sm border border-gray-200" },
+                                    React.createElement(
+                                        "div",
+                                        { className: "text-sm text-gray-500 mb-1" },
+                                        renderLabelWithTooltip(
+                                            "Ulcer Index",
+                                            "Índice Ulcer: Mede a profundidade e duração dos drawdowns. Quanto menor, menos severos são os drawdowns."
+                                        )
+                                    ),
+                                    React.createElement(
+                                        "div",
+                                        { className: "text-2xl font-bold text-gray-800" },
+                                        formatNumber(safeGet(statistics, "total.ulcerIndex"))
+                                    )
+                                )
+                            )
+                        ),
+
+                        // Session Performance
+                        React.createElement(
+                            "div",
+                            { className: "mb-8" },
+                            React.createElement(
+                                "h3",
+                                { className: "text-lg font-medium mb-4 pb-2 border-b border-gray-200" },
+                                "Session Performance"
+                            ),
+                            React.createElement(
+                                "div",
+                                { className: "grid grid-cols-1 md:grid-cols-2 gap-4" },
+                                // Asia Session
+                                React.createElement(
+                                    "div",
+                                    { className: "bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200" },
+                                    React.createElement(
+                                        "h4",
+                                        { className: "font-medium text-gray-800 mb-3 pb-2 border-b border-gray-200" },
+                                        safeGet(statistics, "asia.label", "Asia Session")
+                                    ),
+                                    React.createElement(
+                                        "div",
+                                        { className: "grid grid-cols-2 gap-4" },
+                                        React.createElement(
+                                            "div",
+                                            null,
+                                            React.createElement("div", { className: "text-sm text-gray-500 mb-1" }, "P&L"),
+                                            React.createElement(
+                                                "div",
+                                                {
+                                                    className: `text-xl font-bold ${safeGet(statistics, "asia.pnl", 0) >= 0 ? "text-green-600" : "text-red-600"}`,
+                                                },
+                                                formatCurrency(safeGet(statistics, "asia.pnl"))
+                                            )
+                                        ),
+                                        React.createElement(
+                                            "div",
+                                            null,
+                                            React.createElement("div", { className: "text-sm text-gray-500 mb-1" }, "Trades"),
+                                            React.createElement(
+                                                "div",
+                                                { className: "text-xl font-bold text-gray-800" },
+                                                safeGet(statistics, "asia.orders", 0)
+                                            )
+                                        ),
+                                        React.createElement(
+                                            "div",
+                                            null,
+                                            React.createElement("div", { className: "text-sm text-gray-500 mb-1" }, "Avg Duration"),
+                                            React.createElement(
+                                                "div",
+                                                { className: "text-xl font-bold text-gray-800" },
+                                                formatDuration(safeGet(statistics, "asia.avgDuration"))
+                                            )
+                                        ),
+                                        React.createElement(
+                                            "div",
+                                            null,
+                                            React.createElement("div", { className: "text-sm text-gray-500 mb-1" }, "Risk-Reward"),
+                                            React.createElement(
+                                                "div",
+                                                { className: "text-xl font-bold text-gray-800" },
+                                                formatNumber(safeGet(statistics, "asia.riskRewardRatio"))
+                                            )
+                                        )
+                                    )
+                                ),
+
+                                // London Session
+                                React.createElement(
+                                    "div",
+                                    { className: "bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200" },
+                                    React.createElement(
+                                        "h4",
+                                        { className: "font-medium text-gray-800 mb-3 pb-2 border-b border-gray-200" },
+                                        safeGet(statistics, "london.label", "London Session")
+                                    ),
+                                    React.createElement(
+                                        "div",
+                                        { className: "grid grid-cols-2 gap-4" },
+                                        React.createElement(
+                                            "div",
+                                            null,
+                                            React.createElement("div", { className: "text-sm text-gray-500 mb-1" }, "P&L"),
+                                            React.createElement(
+                                                "div",
+                                                {
+                                                    className: `text-xl font-bold ${safeGet(statistics, "london.pnl", 0) >= 0 ? "text-green-600" : "text-red-600"}`,
+                                                },
+                                                formatCurrency(safeGet(statistics, "london.pnl"))
+                                            )
+                                        ),
+                                        React.createElement(
+                                            "div",
+                                            null,
+                                            React.createElement("div", { className: "text-sm text-gray-500 mb-1" }, "Trades"),
+                                            React.createElement(
+                                                "div",
+                                                { className: "text-xl font-bold text-gray-800" },
+                                                safeGet(statistics, "london.orders", 0)
+                                            )
+                                        ),
+                                        React.createElement(
+                                            "div",
+                                            null,
+                                            React.createElement("div", { className: "text-sm text-gray-500 mb-1" }, "Avg Duration"),
+                                            React.createElement(
+                                                "div",
+                                                { className: "text-xl font-bold text-gray-800" },
+                                                formatDuration(safeGet(statistics, "london.avgDuration"))
+                                            )
+                                        ),
+                                        React.createElement(
+                                            "div",
+                                            null,
+                                            React.createElement("div", { className: "text-sm text-gray-500 mb-1" }, "Risk-Reward"),
+                                            React.createElement(
+                                                "div",
+                                                { className: "text-xl font-bold text-gray-800" },
+                                                formatNumber(safeGet(statistics, "london.riskRewardRatio"))
+                                            )
+                                        )
+                                    )
+                                ),
+
+                                // New York Session
+                                React.createElement(
+                                    "div",
+                                    { className: "bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200" },
+                                    React.createElement(
+                                        "h4",
+                                        { className: "font-medium text-gray-800 mb-3 pb-2 border-b border-gray-200" },
+                                        safeGet(statistics, "newYork.label", "New York Session")
+                                    ),
+                                    React.createElement(
+                                        "div",
+                                        { className: "grid grid-cols-2 gap-4" },
+                                        React.createElement(
+                                            "div",
+                                            null,
+                                            React.createElement("div", { className: "text-sm text-gray-500 mb-1" }, "P&L"),
+                                            React.createElement(
+                                                "div",
+                                                {
+                                                    className: `text-xl font-bold ${safeGet(statistics, "newYork.pnl", 0) >= 0 ? "text-green-600" : "text-red-600"}`,
+                                                },
+                                                formatCurrency(safeGet(statistics, "newYork.pnl"))
+                                            )
+                                        ),
+                                        React.createElement(
+                                            "div",
+                                            null,
+                                            React.createElement("div", { className: "text-sm text-gray-500 mb-1" }, "Trades"),
+                                            React.createElement(
+                                                "div",
+                                                { className: "text-xl font-bold text-gray-800" },
+                                                safeGet(statistics, "newYork.orders", 0)
+                                            )
+                                        ),
+                                        React.createElement(
+                                            "div",
+                                            null,
+                                            React.createElement("div", { className: "text-sm text-gray-500 mb-1" }, "Avg Duration"),
+                                            React.createElement(
+                                                "div",
+                                                { className: "text-xl font-bold text-gray-800" },
+                                                formatDuration(safeGet(statistics, "newYork.avgDuration"))
+                                            )
+                                        ),
+                                        React.createElement(
+                                            "div",
+                                            null,
+                                            React.createElement("div", { className: "text-sm text-gray-500 mb-1" }, "Risk-Reward"),
+                                            React.createElement(
+                                                "div",
+                                                { className: "text-xl font-bold text-gray-800" },
+                                                formatNumber(safeGet(statistics, "newYork.riskRewardRatio"))
+                                            )
+                                        )
+                                    )
+                                ),
+
+                                // Limbo Session
+                                React.createElement(
+                                    "div",
+                                    { className: "bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200" },
+                                    React.createElement(
+                                        "h4",
+                                        { className: "font-medium text-gray-800 mb-3 pb-2 border-b border-gray-200" },
+                                        safeGet(statistics, "limbo.label", "Limbo Session")
+                                    ),
+                                    React.createElement(
+                                        "div",
+                                        { className: "grid grid-cols-2 gap-4" },
+                                        React.createElement(
+                                            "div",
+                                            null,
+                                            React.createElement("div", { className: "text-sm text-gray-500 mb-1" }, "P&L"),
+                                            React.createElement(
+                                                "div",
+                                                {
+                                                    className: `text-xl font-bold ${safeGet(statistics, "limbo.pnl", 0) >= 0 ? "text-green-600" : "text-red-600"}`,
+                                                },
+                                                formatCurrency(safeGet(statistics, "limbo.pnl"))
+                                            )
+                                        ),
+                                        React.createElement(
+                                            "div",
+                                            null,
+                                            React.createElement("div", { className: "text-sm text-gray-500 mb-1" }, "Trades"),
+                                            React.createElement(
+                                                "div",
+                                                { className: "text-xl font-bold text-gray-800" },
+                                                safeGet(statistics, "limbo.orders", 0)
+                                            )
+                                        ),
+                                        React.createElement(
+                                            "div",
+                                            null,
+                                            React.createElement("div", { className: "text-sm text-gray-500 mb-1" }, "Avg Duration"),
+                                            React.createElement(
+                                                "div",
+                                                { className: "text-xl font-bold text-gray-800" },
+                                                formatDuration(safeGet(statistics, "limbo.avgDuration"))
+                                            )
+                                        ),
+                                        React.createElement(
+                                            "div",
+                                            null,
+                                            React.createElement("div", { className: "text-sm text-gray-500 mb-1" }, "Risk-Reward"),
+                                            React.createElement(
+                                                "div",
+                                                { className: "text-xl font-bold text-gray-800" },
+                                                formatNumber(safeGet(statistics, "limbo.riskRewardRatio"))
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        ),
+
+                        // Monthly Performance
+                        React.createElement(
+                            "div",
+                            { className: "mb-4" },
+                            React.createElement(
+                                "h3",
+                                { className: "text-lg font-medium mb-4 pb-2 border-b border-gray-200" },
+                                "Monthly Performance"
+                            ),
+                            React.createElement(
+                                "div",
+                                { className: "overflow-x-auto" },
+                                React.createElement(
+                                    "table",
+                                    { className: "min-w-full divide-y divide-gray-200" },
+                                    React.createElement(
+                                        "thead",
+                                        { className: "bg-gray-50" },
+                                        React.createElement(
+                                            "tr",
+                                            null,
+                                            React.createElement(
+                                                "th",
+                                                { className: "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" },
+                                                "Month"
+                                            ),
+                                            React.createElement(
+                                                "th",
+                                                { className: "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" },
+                                                "P&L"
+                                            ),
+                                            React.createElement(
+                                                "th",
+                                                { className: "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" },
+                                                "Trades"
+                                            ),
+                                            React.createElement(
+                                                "th",
+                                                { className: "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" },
+                                                "Win Rate"
+                                            ),
+                                            React.createElement(
+                                                "th",
+                                                { className: "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" },
+                                                "Growth"
+                                            )
+                                        )
+                                    ),
+                                    React.createElement(
+                                        "tbody",
+                                        { className: "bg-white divide-y divide-gray-200" },
+                                        (statistics.monthlyPerformance || []).map((month, index) => {
+                                            const prevMonth = index > 0 ? statistics.monthlyPerformance[index - 1] : null;
+                                            const growth = prevMonth && prevMonth.pnl !== 0 ? ((month.pnl / prevMonth.pnl - 1) * 100) : 0;
+
+                                            return React.createElement(
+                                                "tr",
+                                                { key: month.month || index },
+                                                React.createElement(
+                                                    "td",
+                                                    { className: "px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" },
+                                                    formatMonth(month.month)
+                                                ),
+                                                React.createElement(
+                                                    "td",
+                                                    {
+                                                        className: `px-6 py-4 whitespace-nowrap text-sm font-medium ${(month.pnl || 0) >= 0 ? "text-green-600" : "text-red-600"}`,
+                                                    },
+                                                    formatCurrency(month.pnl)
+                                                ),
+                                                React.createElement(
+                                                    "td",
+                                                    { className: "px-6 py-4 whitespace-nowrap text-sm text-gray-500" },
+                                                    month.orders || 0
+                                                ),
+                                                React.createElement(
+                                                    "td",
+                                                    { className: "px-6 py-4 whitespace-nowrap text-sm text-gray-500" },
+                                                    formatPercent(month.winRate || 0)
+                                                ),
+                                                React.createElement(
+                                                    "td",
+                                                    {
+                                                        className: `px-6 py-4 whitespace-nowrap text-sm font-medium ${!prevMonth ? "text-gray-400" : growth >= 0 ? "text-green-600" : "text-red-600"}`,
+                                                    },
+                                                    !prevMonth ? "N/A" : `${growth >= 0 ? "+" : ""}${growth.toFixed(2)}%`
+                                                )
+                                            );
+                                        })
+                                    )
+                                )
+                            )
+                        )
+                    )
+                );
+            }
+
+            function App() {
+                const [data, setData] = useState(null);
+                const [error, setError] = useState(null);
+                const [loading, setLoading] = useState(true);
+                const [selectedAccount, setSelectedAccount] = useState('3037813');
+                const [activeTab, setActiveTab] = useState('active');
+                const [dateFilter, setDateFilter] = useState(() => {
+                    const today = new Date();
+                    const dayOfWeek = today.getUTCDay();
+                    const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                    const monday = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - daysToMonday));
+
+                    // Create tomorrow's date to ensure today's trades are included
+                    const tomorrow = new Date();
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+
+                    return {
+                        start: formatDate(monday),
+                        end: formatDate(tomorrow)
+                    };
+                });
+
+                const [resumoDateFilter, setResumoDateFilter] = useState(() => {
+                    const today = new Date();
+                    const dayOfWeek = today.getUTCDay();
+                    const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                    const monday = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - daysToMonday));
+
+                    // Create tomorrow's date to ensure today's trades are included
+                    const tomorrow = new Date();
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+
+                    return {
+                        start: formatDate(monday),
+                        end: formatDate(tomorrow)
+                    };
+                });
+                const [logs, setLogs] = useState([]);
+                const [webhookOutcomes, setWebhookOutcomes] = useState([]);
+                const [activeOrdersCount, setActiveOrdersCount] = useState(0);
+                const [closedOrdersCount, setClosedOrdersCount] = useState(0);
+                const [dailyPnLData, setDailyPnLData] = useState([]);
+                const [recentLogs, setRecentLogs] = useState([]);
+                const wsRef = useRef(null);
+                const [mainTab, setMainTab] = useState('dashboard');
+                const [startingBalance, setStartingBalance] = useState(() => {
+                    const saved = localStorage.getItem('startingBalance');
+                    return saved ? parseFloat(saved) : 500;
+                });
+                const [allAccountsData, setAllAccountsData] = useState({});
+                const [tradingModes, setTradingModes] = useState({});
+                const [sessionSettings, setSessionSettings] = useState({});
+                const [exclusiveMode, setExclusiveMode] = useState({});
+
+                const addLog = useCallback((message) => {
+                    setLogs(prevLogs => {
+                        const newLog = {
+                            time: formatDateTime(new Date()),
+                            message
+                        };
+                        return [...prevLogs, newLog].slice(-50);
+                    });
+                }, []);
+
+                const debouncedAddLog = useCallback((message) => {
+                    const key = message.split(':')[0];
+                    setLogs(prevLogs => {
+                        const index = prevLogs.findIndex(log => log.message.startsWith(key));
+                        if (index !== -1) {
+                            const updatedLogs = [...prevLogs];
+                            updatedLogs[index] = {
+                                time: formatDateTime(new Date()),
+                                message
+                            };
+                            return updatedLogs;
+                        } else {
+                            const newLog = {
+                                time: formatDateTime(new Date()),
+                                message
+                            };
+                            return [...prevLogs, newLog].slice(-50);
+                        }
+                    });
+                }, []);
+
+                const processDailyPnLData = useCallback((closedOrders, serverTime) => {
+                    const dailyPnL = {};
+                    const serverDate = new Date(serverTime);
+                    if (isNaN(serverDate.getTime())) {
+                        console.error('Invalid serverTime:', serverTime);
+                        return;
+                    }
+                    const todayUTC = serverDate.toISOString().split('T')[0];
+                    console.log('Server date (UTC):', todayUTC);
+
+                    let latestTradeDate = new Date(0);
+                    let earliestTradeDate = new Date();
+
+                    console.log('Processing closed orders:', closedOrders);
+                    closedOrders.forEach(order => {
+                        const closeTime = new Date(order.closeTime);
+                        if (isNaN(closeTime.getTime())) {
+                            console.warn('Invalid closeTime:', order.closeTime);
+                            return;
+                        }
+                        const date = closeTime.toISOString().split('T')[0];
+
+                        // Apply date filter
+                        if (dateFilter.start && new Date(date) < new Date(dateFilter.start)) return;
+                        if (dateFilter.end && new Date(date) > new Date(dateFilter.end)) return;
+
+                        const profit = parseFloat(order.profit) || 0;
+
+                        if (!dailyPnL[date]) {
+                            dailyPnL[date] = 0;
+                        }
+                        dailyPnL[date] += profit;
+
+                        if (closeTime > latestTradeDate) latestTradeDate = closeTime;
+                        if (closeTime < earliestTradeDate) earliestTradeDate = closeTime;
+                    });
+
+                    latestTradeDate = new Date(Math.max(latestTradeDate.getTime(), serverDate.getTime()));
+                    const latestTradeDateUTC = latestTradeDate.toISOString().split('T')[0];
+                    console.log('Latest trade date:', latestTradeDateUTC);
+
+                    const startDate = new Date(dateFilter.start || earliestTradeDate);
+                    const endDate = new Date(dateFilter.end || latestTradeDate);
+                    console.log('Start date:', startDate.toISOString().split('T')[0]);
+                    console.log('End date:', endDate.toISOString().split('T')[0]);
+
+                    const pnlData = [];
+                    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                        const dateString = d.toISOString().split('T')[0];
+                        const pnl = dailyPnL[dateString] || 0;
+                        pnlData.push({
+                            date: dateString,
+                            pnl: pnl,
+                            fill: pnl >= 0 ? '#22c55e' : '#ef4444'
+                        });
+                    }
+
+                    console.log('Final P&L data:', pnlData);
+                    setDailyPnLData(pnlData);
+                }, [dateFilter]);
+
+                const fetchWebhookOutcomes = useCallback(async (loginNumber) => {
+                    try {
+                        const response = await fetch(`/api/webhook-outcomes/${loginNumber}?limit=100`);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        const outcomes = await response.json();
+                        console.log('Fetched webhook outcomes:', outcomes);
+                        return outcomes;
+                    } catch (err) {
+                        console.error('Error fetching webhook outcomes:', err);
+                        addLog(`Error fetching webhook outcomes: ${err.message}`);
+                        return [];
+                    }
+                }, [addLog]);
+
+                // --- Updated fetchData with Enhanced Error Handling ---
+                const fetchData = useCallback(async (loginNumber) => {
+                    setLoading(true);
+                    setError(null);
+                    try {
+                        console.log(`Fetching data for account: ${loginNumber}`);
+                        const response = await fetch(`/api/status/${loginNumber}?t=${Date.now()}`);
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                        }
+                        const jsonData = await response.json();
+                        console.log('Fetched data:', jsonData);
+                        if (jsonData.orderCounts) {
+                            console.log('Order volumes:', jsonData.orderCounts);
+                        }
+
+                        // Set trading mode if available in the response
+                        if (jsonData.accountSettings && jsonData.accountSettings.trading_mode) {
+                            console.log(`Loaded trading mode for account ${loginNumber}: ${jsonData.accountSettings.trading_mode}`);
+                            setTradingModes(prev => ({
+                                ...prev,
+                                [loginNumber]: jsonData.accountSettings.trading_mode
+                            }));
+                        } else {
+                            // Default to NORMAL if no setting is found
+                            console.log(`No trading mode found for account ${loginNumber}, defaulting to NORMAL`);
+                            setTradingModes(prev => ({
+                                ...prev,
+                                [loginNumber]: "NORMAL"
+                            }));
+                        }
+
+                        // Set exclusive mode if available in the response
+                        if (jsonData.accountSettings && jsonData.accountSettings.exclusive_mode !== undefined) {
+                            console.log(`Loaded exclusive mode for account ${loginNumber}: ${jsonData.accountSettings.exclusive_mode}`);
+                            setExclusiveMode(prev => ({
+                                ...prev,
+                                [loginNumber]: jsonData.accountSettings.exclusive_mode === 1
+                            }));
+                        } else {
+                            // Default to false if no setting is found
+                            console.log(`No exclusive mode found for account ${loginNumber}, defaulting to false`);
+                            setExclusiveMode(prev => ({
+                                ...prev,
+                                [loginNumber]: false
+                            }));
+                        }
+
+                        // Set session settings if available in the response
+                        if (jsonData.accountSettings) {
+                            console.log(`Loaded session settings for account ${loginNumber}`);
+                            setSessionSettings(prev => ({
+                                ...prev,
+                                [loginNumber]: {
+                                    asia_session: jsonData.accountSettings.asia_session === 1,
+                                    london_session: jsonData.accountSettings.london_session === 1,
+                                    new_york_session: jsonData.accountSettings.new_york_session === 1,
+                                    limbo_session: jsonData.accountSettings.limbo_session === 1
+                                }
+                            }));
+                        } else {
+                            // Default to all sessions enabled if no settings found
+                            console.log(`No session settings found for account ${loginNumber}, defaulting to all enabled`);
+                            setSessionSettings(prev => ({
+                                ...prev,
+                                [loginNumber]: {
+                                    asia_session: true,
+                                    london_session: true,
+                                    new_york_session: true,
+                                    limbo_session: true
+                                }
+                            }));
+                        }
+
+                        let unrealizedPnL = 0;
+                        let realizedPnL = 0;
+
+                        // Only apply date filter to closed orders, not active orders
+                        const filterDateForClosed = (date) => {
+                            return (!dateFilter.start || new Date(date) >= new Date(dateFilter.start)) &&
+                                (!dateFilter.end || new Date(date) <= new Date(dateFilter.end));
+                        };
+
+                        if (jsonData.activeOrders && jsonData.activeOrders.data && jsonData.activeOrders.data.marketOrders) {
+                            // Don't filter active orders by date
+                            unrealizedPnL = jsonData.activeOrders.data.marketOrders
+                                .reduce((sum, order) => sum + parseFloat(order.profit), 0);
+                        }
+
+                        if (jsonData.closedOrders && jsonData.closedOrders.data && jsonData.closedOrders.data.marketOrders) {
+                            // Apply date filter only to closed orders
+                            realizedPnL = jsonData.closedOrders.data.marketOrders
+                                .filter(order => filterDateForClosed(order.closeTime))
+                                .reduce((sum, order) => sum + parseFloat(order.profit), 0);
+                        }
+
+                        setData({ ...jsonData, unrealizedPnL, realizedPnL });
+                        setActiveOrdersCount(jsonData.activeOrders?.data?.marketOrders?.length || 0);
+                        setClosedOrdersCount(jsonData.closedOrders?.data?.marketOrders?.length || 0);
+                        processDailyPnLData(jsonData.closedOrders?.data?.marketOrders || [], jsonData.serverTime);
+                    } catch (err) {
+                        console.error('Error fetching data:', err);
+                        setError(`Failed to fetch data for account ${loginNumber}: ${err.message}`);
+                        addLog(`Error fetching data for account ${loginNumber}: ${err.message}`);
+                    } finally {
+                        setLoading(false);
+                    }
+                }, [addLog, processDailyPnLData, dateFilter]);
+
+                const calculateClosedOrderTotals = useCallback((orders) => {
+                    return orders.reduce((acc, order) => {
+                        if (order.side === 'BUY') {
+                            acc.buyVolume += order.volume;
+                        } else if (order.side === 'SELL') {
+                            acc.sellVolume += order.volume;
+                        }
+                        return acc;
+                    }, { buyVolume: 0, sellVolume: 0 });
+                }, []);
+
+                const fetchTradingMode = useCallback(async (loginNumber) => {
+                    try {
+                        const response = await fetch(`/api/account-settings/${loginNumber}`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            setTradingModes(prev => ({
+                                ...prev,
+                                [loginNumber]: data.trading_mode || 'NORMAL'
+                            }));
+
+                            // Also set exclusive mode
+                            setExclusiveMode(prev => ({
+                                ...prev,
+                                [loginNumber]: data.exclusive_mode === 1
+                            }));
+
+                            // Also set session settings
+                            setSessionSettings(prev => ({
+                                ...prev,
+                                [loginNumber]: {
+                                    asia_session: data.asia_session === 1,
+                                    london_session: data.london_session === 1,
+                                    new_york_session: data.new_york_session === 1,
+                                    limbo_session: data.limbo_session === 1
+                                }
+                            }));
+                        } else {
+                            // If the endpoint returns an error, default to NORMAL and all sessions enabled
+                            setTradingModes(prev => ({
+                                ...prev,
+                                [loginNumber]: 'NORMAL'
+                            }));
+
+                            setExclusiveMode(prev => ({
+                                ...prev,
+                                [loginNumber]: false
+                            }));
+
+                            setSessionSettings(prev => ({
+                                ...prev,
+                                [loginNumber]: {
+                                    asia_session: true,
+                                    london_session: true,
+                                    new_york_session: true,
+                                    limbo_session: true
+                                }
+                            }));
+                        }
+                    } catch (error) {
+                        console.error('Error fetching trading mode:', error);
+                        // Default to NORMAL on error
+                        setTradingModes(prev => ({
+                            ...prev,
+                            [loginNumber]: 'NORMAL'
+                        }));
+
+                        setExclusiveMode(prev => ({
+                            ...prev,
+                            [loginNumber]: false
+                        }));
+
+                        // Default to all sessions enabled on error
+                        setSessionSettings(prev => ({
+                            ...prev,
+                            [loginNumber]: {
+                                asia_session: true,
+                                london_session: true,
+                                new_york_session: true,
+                                limbo_session: true
+                            }
+                        }));
+                    }
+                }, []);
+
+                const updateTradingMode = useCallback(async (loginNumber, mode) => {
+                    try {
+                        console.log(`Updating trading mode for ${loginNumber} to ${mode}`);
+
+                        // Map UI labels to backend values if needed
+                        let tradingModeValue;
+                        if (mode === "SÓ COMPRA") {
+                            tradingModeValue = "BUY_ONLY";
+                        } else if (mode === "SÓ VENDA") {
+                            tradingModeValue = "SELL_ONLY";
+                        } else {
+                            tradingModeValue = mode; // Already in correct format
+                        }
+
+                        const response = await fetch(`/api/account-settings/${loginNumber}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ tradingMode: tradingModeValue })
+                        });
+
+                        if (response.ok) {
+                            // Immediately update local state to reflect the change
+                            setTradingModes(prev => {
+                                console.log(`Setting trading mode in state: ${loginNumber} => ${mode}`);
+                                return {
+                                    ...prev,
+                                    [loginNumber]: mode
+                                };
+                            });
+
+                            // Force a refresh of the data to ensure consistency
+                            setTimeout(() => fetchData(loginNumber), 500);
+
+                            addLog(`Trading mode for account ${loginNumber} updated to ${mode}`);
+                        } else {
+                            const errorData = await response.json();
+                            throw new Error(errorData.error || 'Failed to update trading mode');
+                        }
+                    } catch (error) {
+                        console.error('Error updating trading mode:', error);
+                        addLog(`Error updating trading mode: ${error.message}`);
+                    }
+                }, [addLog, fetchData]);
+
+                const updateExclusiveMode = useCallback(async (loginNumber, enabled) => {
+                    try {
+                        console.log(`Updating exclusive mode for ${loginNumber} to ${enabled ? 'enabled' : 'disabled'}`);
+
+                        const response = await fetch(`/api/account-settings/${loginNumber}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ exclusive_mode: enabled ? 1 : 0 })
+                        });
+
+                        if (response.ok) {
+                            // Immediately update local state to reflect the change
+                            setExclusiveMode(prev => ({
+                                ...prev,
+                                [loginNumber]: enabled
+                            }));
+
+                            // Force a refresh of the data to ensure consistency
+                            setTimeout(() => fetchData(loginNumber), 500);
+
+                            addLog(`Exclusive mode for account ${loginNumber} ${enabled ? 'enabled' : 'disabled'}`);
+                        } else {
+                            const errorData = await response.json();
+                            throw new Error(errorData.error || 'Failed to update exclusive mode');
+                        }
+                    } catch (error) {
+                        console.error('Error updating exclusive mode:', error);
+                        addLog(`Error updating exclusive mode: ${error.message}`);
+                    }
+                }, [addLog, fetchData]);
+
+                const updateSessionSetting = useCallback(async (loginNumber, session, enabled) => {
+                    try {
+                        console.log(`Updating ${session} for account ${loginNumber} to ${enabled ? 'enabled' : 'disabled'}`);
+
+                        // Prepare the request body with the session setting
+                        const requestBody = {
+                            [session]: enabled ? 1 : 0
+                        };
+
+                        const response = await fetch(`/api/account-settings/${loginNumber}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(requestBody)
+                        });
+
+                        if (response.ok) {
+                            // Immediately update local state to reflect the change
+                            setSessionSettings(prev => {
+                                const accountSettings = prev[loginNumber] || {
+                                    asia_session: true,
+                                    london_session: true,
+                                    new_york_session: true,
+                                    limbo_session: true
+                                };
+
+                                return {
+                                    ...prev,
+                                    [loginNumber]: {
+                                        ...accountSettings,
+                                        [session]: enabled
+                                    }
+                                };
+                            });
+
+                            // Force a refresh of the data to ensure consistency
+                            setTimeout(() => fetchData(loginNumber), 500);
+
+                            const sessionName = session.replace('_session', '').toUpperCase();
+                            addLog(`${sessionName} session for account ${loginNumber} ${enabled ? 'enabled' : 'disabled'}`);
+                        } else {
+                            const errorData = await response.json();
+                            throw new Error(errorData.error || `Failed to update ${session}`);
+                        }
+                    } catch (error) {
+                        console.error(`Error updating ${session}:`, error);
+                        addLog(`Error updating ${session}: ${error.message}`);
+                    }
+                }, [addLog, fetchData]);
+
+                useEffect(() => {
+                    // Only fetch data when on dashboard tab
+                    if (mainTab !== 'dashboard') {
+                        // For other tabs, fetch once but don't set up interval
+                        fetchData(selectedAccount);
+                        fetchTradingMode(selectedAccount);
+                        return;
+                    }
+
+                    fetchData(selectedAccount);
+                    fetchTradingMode(selectedAccount);
+                    fetchWebhookOutcomes(selectedAccount).then(setWebhookOutcomes);
+
+                    const interval = setInterval(() => {
+                        fetchData(selectedAccount);
+                        fetchWebhookOutcomes(selectedAccount).then(setWebhookOutcomes);
+                    }, 10000); // Increased to 10 seconds
+
+                    return () => {
+                        clearInterval(interval);
+                        if (wsRef.current) {
+                            wsRef.current.close();
+                        }
+                    };
+                }, [selectedAccount, fetchData, dateFilter, fetchTradingMode, mainTab]);
+
+                useEffect(() => {
+                    // Only fetch logs when on dashboard tab
+                    if (mainTab !== 'dashboard') return;
+
+                    async function fetchRecentLogs(account) {
+                        try {
+                            const response = await fetch(`/api/recent-logs?account=${account}`); // UNCOMMENT THIS
+                            if (response.ok) {
+                                const logs = await response.json();
+                                setRecentLogs(logs);
+                            }
+                        } catch (error) {
+                            console.error('Error fetching recent logs:', error);
+                        }
+                    }
+
+                    fetchRecentLogs(selectedAccount);
+                    const interval = setInterval(() => {
+                        fetchRecentLogs(selectedAccount);
+                    }, 10000); // Increased to 10 seconds to reduce request frequency
+
+                    return () => clearInterval(interval);
+                }, [selectedAccount, mainTab]);
+
+                const fetchAllAccountsData = useCallback(async () => {
+                    if (mainTab !== 'resumo') return;
+
+                    const accounts = ['174225', '3028177', '3028235', '3028450', '3028761', '3037813', '3037814', '3044621', '3047423', '3048221', '3048222', '3048699', '3049696'];
+                    const newData = {};
+
+                    for (const account of accounts) {
+                        try {
+                            // Add date filter parameters to the API call
+                            const response = await fetch(`/api/status/${account}?t=${Date.now()}&startDate=${resumoDateFilter.start}&endDate=${resumoDateFilter.end}`);
+                            if (response.ok) {
+                                const data = await response.json();
+                                newData[account] = {
+                                    accountType: data.accountType,
+                                    equity: data.accountStatus?.data?.equity || 0
+                                };
+                            }
+                        } catch (error) {
+                            console.error(`Error fetching data for account ${account}:`, error);
+                        }
+                    }
+
+                    setAllAccountsData(newData);
+                }, [mainTab, startingBalance, resumoDateFilter]);
+
+                const formatDateTime = (timestamp) => {
+                    if (!timestamp) return 'N/A';
+                    const date = new Date(typeof timestamp === 'string' ? timestamp : Number(timestamp));
+                    return date.toISOString().replace('T', ' ').substr(0, 19);
+                };
+
+                const columns = [
+                    { key: 'id', label: 'ID' },
+                    { key: 'symbol', label: 'SYMBOL' },
+                    { key: 'side', label: 'SIDE' },
+                    { key: 'volume', label: 'VOL' },
+                    { key: 'spread_at_open', label: 'SPREAD', render: (row) => row.spread_at_open != null ? Math.round(parseFloat(row.spread_at_open) * 10) : 'N/A' },
+                    { key: 'openPrice', label: 'OP' },
+                    { key: 'ob_reference_price', label: 'OB REF', render: (row) => row.ob_reference_price != null ? parseFloat(row.ob_reference_price).toFixed(5) : 'N/A' },
+                    {
+                        key: 'diff_op_ob', label: 'DIST. OP/OB', render: (row) => {
+                            if (row.openPrice != null && row.ob_reference_price != null) {
+                                const diff = Math.abs(row.openPrice - row.ob_reference_price) * 10000;
+                                return diff.toFixed(1);
+                            }
+                            return 'N/A';
+                        }
+                    },
+                    { key: 'takeProfit', label: 'TP' },
+                    { key: 'real_tp_pips', label: 'TP PIPS', render: (row) => row.real_tp_pips != null ? (row.symbol.includes('US100') ? parseFloat(row.real_tp_pips).toFixed(1) : Math.round(parseFloat(row.real_tp_pips))) : 'N/A' },
+                    { key: 'stopLoss', label: 'SL' },
+                    { key: 'real_sl_pips', label: 'SL PIPS', render: (row) => row.real_sl_pips != null ? (row.symbol.includes('US100') ? parseFloat(row.real_sl_pips).toFixed(1) : Math.round(parseFloat(row.real_sl_pips))) : 'N/A' },
+                    { key: 'openTime', label: 'OPEN T.', render: (row) => formatDateTime(row.openTime) },
+                    { key: 'profit', label: 'PROFIT', render: (row) => React.createElement('span', { className: `font-bold text-lg ${parseFloat(row.profit) >= 0 ? 'text-green-600' : 'text-red-600'}` }, parseFloat(row.profit).toFixed(2)) },
+                ];
+
+                const closedOrderColumns = [
+                    { key: 'id', label: 'ID' },
+                    { key: 'symbol', label: 'SYMBOL' },
+                    { key: 'side', label: 'SIDE' },
+                    { key: 'volume', label: 'VOL' },
+                    { key: 'spread_at_open', label: 'SPREAD', render: (row) => row.spread_at_open != null ? Math.round(parseFloat(row.spread_at_open) * 10) : 'N/A' },
+                    { key: 'openPrice', label: 'OPEN PRICE', render: (row) => row.isWebhookOutcome ? 'N/A' : row.openPrice },
+                    { key: 'closePrice', label: 'CLOSE PRICE', render: (row) => row.isWebhookOutcome ? 'N/A' : row.closePrice },
+                    {
+                        key: 'diff_op_ob', label: 'DIST. OP/OB', render: (row) => {
+                            if (row.isWebhookOutcome) return 'N/A';
+                            if (row.openPrice != null && row.ob_reference_price != null) {
+                                const diff = Math.abs(row.openPrice - row.ob_reference_price) * 10000;
+                                return diff.toFixed(1);
+                            }
+                            return 'N/A';
+                        }
+                    },
+                    { key: 'takeProfit', label: 'TP', render: (row) => row.isWebhookOutcome ? 'N/A' : row.takeProfit },
+                    { key: 'real_tp_pips', label: 'TP PIPS', render: (row) => row.real_tp_pips != null ? Math.round(parseFloat(row.real_tp_pips)) : 'N/A' },
+                    { key: 'stopLoss', label: 'SL', render: (row) => row.isWebhookOutcome ? 'N/A' : row.stopLoss },
+                    { key: 'real_sl_pips', label: 'SL PIPS', render: (row) => row.real_sl_pips != null ? Math.round(parseFloat(row.real_sl_pips)) : 'N/A' },
+                    { key: 'openTime', label: 'OPEN TIME', render: (row) => formatDateTime(row.openTime) },
+                    { key: 'closeTime', label: 'CLOSE TIME', render: (row) => row.isWebhookOutcome ? formatDateTime(row.openTime) : formatDateTime(row.closeTime) },
+                    {
+                        key: 'profit', label: 'PROFIT', render: (row) => {
+                            if (row.isWebhookOutcome) {
+                                return React.createElement('span', { className: 'font-bold text-lg text-gray-500' }, 'N/A');
+                            }
+                            return React.createElement('span', { className: `font-bold text-lg ${parseFloat(row.profit) >= 0 ? 'text-green-600' : 'text-red-600'}` }, parseFloat(row.profit).toFixed(2));
+                        }
+                    },
+                ];
+
+                // Modified to only apply date filtering to closed orders, not active orders
+                const filterClosedOrders = (orders) => {
+                    if (!dateFilter.start && !dateFilter.end) return orders;
+                    console.log('Filtering closed orders:', { dateFilter, orderCount: orders.length });
+                    return orders.filter(order => {
+                        const orderDate = new Date(order.closeTime || order.openTime);
+                        if (isNaN(orderDate.getTime())) {
+                            console.warn('Invalid order date:', order.closeTime || order.openTime);
+                            return false;
+                        }
+                        const startDate = dateFilter.start ? new Date(dateFilter.start) : null;
+                        const endDate = dateFilter.end ? new Date(dateFilter.end) : null;
+                        const result = (!startDate || orderDate >= startDate) && (!endDate || orderDate <= endDate);
+                        return result;
+                    });
+                };
+
+                useEffect(() => {
+                    if (mainTab === 'resumo') {
+                        fetchAllAccountsData();
+                        const interval = setInterval(fetchAllAccountsData, 10000);
+                        return () => clearInterval(interval);
+                    }
+                }, [mainTab, fetchAllAccountsData]);
+
+                const handleStartingBalanceChange = (e) => {
+                    const value = parseFloat(e.target.value);
+                    if (!isNaN(value) && value > 0) {
+                        setStartingBalance(value);
+                        localStorage.setItem('startingBalance', value.toString());
+                    }
+                };
+
+                const handleAccountChange = (account) => {
+                    setSelectedAccount(account);
+                    // Fetch trading mode for the new account if not already in state
+                    if (!tradingModes[account]) {
+                        fetchTradingMode(account);
+                    }
+                };
+
+                // --- Updated handleDateFilterChange with useCallback ---
+                const handleDateFilterChange = useCallback((start, end) => {
+                    setDateFilter({ start, end });
+                }, []);
+
+                if (loading && !data) return React.createElement('div', { className: 'text-center mt-8' }, 'Loading...');
+                if (error) return React.createElement('div', { className: 'text-centermt-8 text-red-600' }, `Error: ${error}`);
+                if (!data) return null;
+
+                // Don't apply date filtering to active orders
+                const activeOrders = data.activeOrders?.data?.marketOrders || [];
+                // Apply date filtering only to closed orders
+                const closedOrders = filterClosedOrders(data.closedOrders?.data?.marketOrders || []);
+
+                // Convert webhook outcomes to order-like format for display
+                // Requirements: 4.1, 4.2, 4.4, 4.5 - Display rejected/error orders with reasons
+                const webhookOrdersForDisplay = webhookOutcomes
+                    .filter(outcome => outcome.outcome === 'REJECTED' || outcome.outcome === 'ERROR')
+                    .map(outcome => ({
+                        id: `webhook_${outcome.id}`,
+                        symbol: outcome.symbol,
+                        side: outcome.action,
+                        volume: outcome.size || 0,
+                        openPrice: 0,
+                        closePrice: 0,
+                        takeProfit: 0,
+                        stopLoss: 0,
+                        openTime: outcome.processed_at,
+                        closeTime: outcome.processed_at,
+                        profit: 0,
+                        swap: 0,
+                        commission: 0,
+                        status: outcome.outcome, // REJECTED or ERROR
+                        reason: outcome.reason || 'No reason provided',
+                        alert_id: outcome.alert_id,
+                        isWebhookOutcome: true
+                    }));
+
+                // Combine closed orders with webhook outcomes for complete trade history
+                // Requirements: 4.5 - Include rejected/error orders in default trade filters
+                const allTradeHistory = [...closedOrders, ...webhookOrdersForDisplay]
+                    .sort((a, b) => (b.closeTime || b.openTime) - (a.closeTime || a.openTime));
+
+                // Get current account session settings
+                const currentAccountSessionSettings = sessionSettings[selectedAccount] || {
+                    asia_session: true,
+                    london_session: true,
+                    new_york_session: true,
+                    limbo_session: true
+                };
+
+                // Get current account exclusive mode setting
+                const currentAccountExclusiveMode = exclusiveMode[selectedAccount] || false;
+
+                return React.createElement('div', { className: 'container mx-auto px-4 py-3' },
+                    React.createElement('div', { className: 'mb-4 border-b border-gray-200' },
+                        React.createElement('div', { className: 'flex gap-4' },
+                            React.createElement('button', {
+                                className: `px-4 py-2 font-bold text-base rounded-t-lg ${mainTab === 'dashboard' ? 'bg-white border-t border-l border-r border-gray-200 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`,
+                                onClick: () => setMainTab('dashboard')
+                            }, 'Dashboard'),
+                            React.createElement('button', {
+                                className: `px-4 py-2 font-bold text-base rounded-t-lg ${mainTab === 'logs' ? 'bg-white border-t border-l border-r border-gray-200 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`,
+                                onClick: () => setMainTab('logs')
+                            }, 'Logs'),
+                            React.createElement('button', {
+                                className: `px-4 py-2 font-bold text-base rounded-t-lg ${mainTab === 'resumo' ? 'bg-white border-t border-l border-r border-gray-200 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`,
+                                onClick: () => setMainTab('resumo')
+                            }, 'Resumo'),
+                            React.createElement('button', {
+                                className: `px-4 py-2 font-bold text-base rounded-t-lg ${mainTab === 'statistics' ? 'bg-white border-t border-l border-r border-gray-200 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`,
+                                onClick: () => setMainTab('statistics')
+                            }, 'Statistics')
+                        )
+                    ),
+
+                    mainTab === 'dashboard' ? (
+                        React.createElement(React.Fragment, null,
+                            // Dashboard Header with Account Selection and Date Filter
+                            React.createElement('div', { className: 'dashboard-header' },
+                                React.createElement('div', { className: 'flex justify-between items-center flex-wrap gap-4' },
+                                    React.createElement('div', { className: 'flex gap-2 flex-wrap' },
+                                        React.createElement('button', {
+                                            className: `account-button ${selectedAccount === '174225' ? 'active' : ''}`,
+                                            onClick: () => handleAccountChange('174225')
+                                        }, '174225 '),
+                                        React.createElement('button', {
+                                            className: `account-button ${selectedAccount === '3028177' ? 'active' : ''}`,
+                                            onClick: () => handleAccountChange('3028177')
+                                        }, '3028177'),
+                                        React.createElement('button', {
+                                            className: `account-button ${selectedAccount === '3028235' ? 'active' : ''}`,
+                                            onClick: () => handleAccountChange('3028235')
+                                        }, '3028235'),
+                                        React.createElement('button', {
+                                            className: `account-button ${selectedAccount === '3028450' ? 'active' : ''}`,
+                                            onClick: () => handleAccountChange('3028450')
+                                        }, '3028450'),
+                                        React.createElement('button', {
+                                            className: `account-button ${selectedAccount === '3028761' ? 'active' : ''}`,
+                                            onClick: () => handleAccountChange('3028761')
+                                        }, '3028761'),
+                                        React.createElement('button', {
+                                            className: `account-button ${selectedAccount === '3037813' ? 'active' : ''}`,
+                                            onClick: () => handleAccountChange('3037813')
+                                        }, '3037813'),
+                                        React.createElement('button', {
+                                            className: `account-button ${selectedAccount === '3037814' ? 'active' : ''}`,
+                                            onClick: () => handleAccountChange('3037814')
+                                        }, '3037814'),
+                                        React.createElement('button', {
+                                            className: `account-button ${selectedAccount === '3044621' ? 'active' : ''}`,
+                                            onClick: () => handleAccountChange('3044621')
+                                        }, '3044621'),
+                                        React.createElement('button', {
+                                            className: `account-button ${selectedAccount === '3047423' ? 'active' : ''}`,
+                                            onClick: () => handleAccountChange('3047423')
+                                        }, '3047423'),
+                                        React.createElement('button', {
+                                            className: `account-button ${selectedAccount === '3048221' ? 'active' : ''}`,
+                                            onClick: () => handleAccountChange('3048221')
+                                        }, '3048221'),
+                                        React.createElement('button', {
+                                            className: `account-button ${selectedAccount === '3048222' ? 'active' : ''}`,
+                                            onClick: () => handleAccountChange('3048222')
+                                        }, '3048222'),
+                                        React.createElement('button', {
+                                            className: `account-button ${selectedAccount === '3048699' ? 'active' : ''}`,
+                                            onClick: () => handleAccountChange('3048699')
+                                        }, '3048699'),
+                                        React.createElement('button', {
+                                            className: `account-button ${selectedAccount === '3049696' ? 'active' : ''}`,
+                                            onClick: () => handleAccountChange('3049696')
+                                        }, '3049696')
+                                    ),
+                                    // Date Filter in Header
+                                    React.createElement('div', { className: 'flex items-center space-x-2' },
+                                        React.createElement('span', { className: 'text-sm text-gray-600 font-medium' }, 'Filter Range:'),
+                                        React.createElement(DateFilter, {
+                                            onFilterChange: handleDateFilterChange,
+                                            initialStartDate: dateFilter.start,
+                                            initialEndDate: dateFilter.end
+                                        })
+                                    )
+                                )
+                            ),
+                            // Summary Cards
+
+                            React.createElement(SummaryCards, {
+                                activeOrders: data.activeOrders?.data?.marketOrders || [],
+                                closedOrders: data.closedOrders?.data?.marketOrders || [],
+                                pnl: data.realizedPnL || 0,
+                                unrealizedPnL: data.unrealizedPnL || 0
+                            }),
+
+                            React.createElement('div', { className: 'dashboard-grid' },
+                                // Left column - Account Overview
+                                React.createElement(CollapsibleSection, {
+                                    title: 'Account Overview',
+                                    defaultOpen: true
+                                },
+                                    // Balance metrics in compact grid
+                                    React.createElement('div', { className: 'grid grid-cols-2 gap-3 mb-4' },
+                                        React.createElement(MetricCard, {
+                                            label: 'Balance',
+                                            value: `$${data.accountStatus?.data?.balance?.toFixed(2) || 'N/A'}`,
+                                            color: 'blue'
+                                        }),
+                                        React.createElement(MetricCard, {
+                                            label: 'Equity',
+                                            value: `$${data.accountStatus?.data?.equity?.toFixed(2) || 'N/A'}`,
+                                            color: 'blue'
+                                        }),
+                                        React.createElement(MetricCard, {
+                                            label: 'Margin',
+                                            value: `$${data.accountStatus?.data?.margin?.toFixed(2) || 'N/A'}`,
+                                            color: 'gray'
+                                        }),
+                                        React.createElement(MetricCard, {
+                                            label: 'Free Margin',
+                                            value: `$${data.accountStatus?.data?.freeMargin?.toFixed(2) || 'N/A'}`,
+                                            color: 'green'
+                                        })
+                                    ),
+                                    React.createElement(MetricCard, {
+                                        label: 'Leverage',
+                                        value: data.accountStatus?.data?.leverage || 'N/A',
+                                        color: 'gray'
+                                    }),
+
+                                    // Last Signal and Last Parameters with professional cards
+
+                                    React.createElement('div', {
+                                        className: 'overview-grid',
+                                        style: { marginTop: '1rem' }
+                                    },
+                                        // Last Signal Card
+                                        React.createElement('div', { className: 'overview-card' },
+                                            React.createElement('div', { className: 'overview-card-header' }, 'Último Alerta'),
+                                            React.createElement('div', { className: 'overview-card-content' },
+                                                React.createElement('table', { className: 'overview-table' },
+                                                    React.createElement('tbody', null,
+                                                        React.createElement('tr', null,
+                                                            React.createElement('td', { className: 'label-col' }, 'Timeframe:'),
+                                                            React.createElement('td', { className: 'value-col' }, (data.latestSignalParams && data.latestSignalParams.timeframe) || 'N/A')
+                                                        ),
+                                                        React.createElement('tr', null,
+                                                            React.createElement('td', { className: 'label-col' }, 'Size:'),
+                                                            React.createElement('td', { className: 'value-col' }, (data.latestSignalParams && data.latestSignalParams.size) ? data.latestSignalParams.size.toFixed(2) : 'N/A')
+                                                        ),
+                                                        React.createElement('tr', null,
+                                                            React.createElement('td', { className: 'label-col' }, 'Max Size:'),
+                                                            React.createElement('td', { className: 'value-col' }, (data.latestSignalParams && data.latestSignalParams.maxSize) ? data.latestSignalParams.maxSize.toFixed(2) : 'N/A')
+                                                        ),
+                                                        React.createElement('tr', null,
+                                                            React.createElement('td', { className: 'label-col' }, 'TP:'),
+                                                            React.createElement('td', { className: 'value-col' }, (data.latestSignalParams && data.latestSignalParams.takeProfit) ? data.latestSignalParams.takeProfit.toFixed(1) : 'N/A')
+                                                        ),
+                                                        React.createElement('tr', null,
+                                                            React.createElement('td', { className: 'label-col' }, 'SL:'),
+                                                            React.createElement('td', { className: 'value-col' }, (data.latestSignalParams && data.latestSignalParams.stopLoss) ? data.latestSignalParams.stopLoss.toFixed(1) : 'N/A')
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        ),
+
+                                        // Last Parameters Card
+                                        React.createElement('div', { className: 'overview-card' },
+                                            React.createElement('div', { className: 'overview-card-header' }, 'Últimos Parâmetros'),
+                                            React.createElement('div', { className: 'overview-card-content' },
+                                                React.createElement('table', { className: 'overview-table' },
+                                                    React.createElement('tbody', null,
+                                                        React.createElement('tr', null,
+                                                            React.createElement('td', { className: 'label-col' }, 'Par:'),
+                                                            React.createElement('td', { className: 'value-col' }, (data.latestSignalParams && data.latestSignalParams.symbol) || 'N/A')
+                                                        ),
+                                                        React.createElement('tr', null,
+                                                            React.createElement('td', { className: 'label-col' }, 'Max OB:'),
+                                                            React.createElement('td', { className: 'value-col' }, (data.latestSignalParams && data.latestSignalParams.maxObAlert) || 'N/A')
+                                                        ),
+                                                        React.createElement('tr', null,
+                                                            React.createElement('td', { className: 'label-col' }, 'Fractal:'),
+                                                            React.createElement('td', { className: 'value-col' }, (data.latestSignalParams && data.latestSignalParams.fractal) || 'N/A')
+                                                        ),
+                                                        React.createElement('tr', null,
+                                                            React.createElement('td', { className: 'label-col' }, 'Dist FVG:'),
+                                                            React.createElement('td', { className: 'value-col' }, (data.latestSignalParams && data.latestSignalParams.fvgDistance) || 'N/A')
+                                                        ),
+                                                        React.createElement('tr', null,
+                                                            React.createElement('td', { className: 'label-col' }, 'Tipo OB:'),
+                                                            React.createElement('td', { className: 'value-col' }, (data.latestSignalParams && data.latestSignalParams.findObType) || 'N/A')
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    )
+                                ),
+                                // Middle column - Results and toggles
+                                React.createElement(CollapsibleSection, {
+                                    title: 'Trading Controls',
+                                    defaultOpen: true
+                                },
+                                    // P&L metrics
+                                    React.createElement('div', { className: 'grid grid-cols-2 gap-3 mb-4' },
+                                        React.createElement(MetricCard, {
+                                            label: 'Unrealized P&L',
+                                            value: `$${data.unrealizedPnL ? data.unrealizedPnL.toFixed(2) : 'N/A'}`,
+                                            color: data.unrealizedPnL >= 0 ? 'green' : 'red'
+                                        }),
+                                        React.createElement(MetricCard, {
+                                            label: 'Realized P&L',
+                                            value: `$${data.realizedPnL ? data.realizedPnL.toFixed(2) : 'N/A'}`,
+                                            color: data.realizedPnL >= 0 ? 'green' : 'red'
+                                        })
+                                    ),
+                                    // Trading controls
+                                    // Removed old table rows
+                                    /*
+                                                React.createElement('td', { className: 'data-label' }, 'Unrealized P&L:'),
+                                                React.createElement('td', { className: `data-value text-lg font-bold ${data.unrealizedPnL >= 0 ? 'text-green-600' : 'text-red-600'}` }, `$${data.unrealizedPnL ? data.unrealizedPnL.toFixed(2) : 'N/A'}`)
+                                            ),
+                                            React.createElement('tr', null,
+                                                React.createElement('td', { className: 'data-label' }, 'Realized P&L:'),
+                                                React.createElement('td', { className: `data-value text-lg font-bold ${data.realizedPnL >= 0 ? 'text-green-600' : 'text-red-600'}` }, `$${data.realizedPnL ? data.realizedPnL.toFixed(2) : 'N/A'}`)
+                                            )
+                                        )
+                                    */
+                                    React.createElement('div', { className: 'mt-4' },
+                                        React.createElement('div', { className: 'flex items-center' },
+                                            React.createElement('h3', { className: 'text-sm font-semibold text-gray-900 mr-2' }, 'Modo Exclusivo:'),
+                                            React.createElement('label', { className: 'toggle-switch mr-2' },
+                                                React.createElement('input', {
+                                                    type: 'checkbox',
+                                                    checked: currentAccountExclusiveMode,
+                                                    onChange: () => updateExclusiveMode(selectedAccount, !currentAccountExclusiveMode)
+                                                }),
+                                                React.createElement('span', { className: 'toggle-slider' })
+                                            ),
+                                            React.createElement('span', { className: 'text-sm text-gray-700' }, 'Um trade por vez')
+                                        )
+                                    ),
+                                    // Trading Mode Selector
+                                    React.createElement('div', { className: 'mt-4' },
+                                        React.createElement('div', { className: 'flex items-center' },
+                                            React.createElement('h3', { className: 'text-sm font-semibold text-gray-900 mr-3' }, 'Mode:'),
+                                            React.createElement(TradingModeSelector, {
+                                                selectedAccount: selectedAccount,
+                                                tradingMode: tradingModes[selectedAccount] || 'NORMAL',
+                                                onTradingModeChange: updateTradingMode
+                                            })
+                                        )
+                                    ),
+                                    // Trading Session Toggles
+                                    React.createElement('div', { className: 'mt-4' },
+                                        React.createElement('div', { className: 'flex items-center' },
+                                            React.createElement('h3', { className: 'text-sm font-semibold text-gray-900 mr-3' }, 'Sessions:'),
+                                            React.createElement(TradingSessionToggles, {
+                                                selectedAccount: selectedAccount,
+                                                sessionSettings: currentAccountSessionSettings,
+                                                onToggleSession: updateSessionSetting
+                                            })
+                                        )
+                                    )
+                                )),
+                            // Right column - Daily P&L Chart
+                            React.createElement(CollapsibleSection, {
+                                title: 'Daily P&L Chart',
+                                defaultOpen: true
+                            },
+                                React.createElement(DailyPnLChart, { data: dailyPnLData })
+                            )
+                        ),
+                        // Orders Table with Summary
+                        React.createElement('div', { className: 'data-card mt-3' },
+                            React.createElement('div', { className: 'border-b border-gray-200 pb-4 mb-4' },
+                                React.createElement('div', { className: 'flex justify-between items-center' },
+                                    React.createElement('div', { className: 'flex gap-2' },
+                                        React.createElement('button', {
+                                            className: `tab-button ${activeTab === 'active' ? 'active' : ''}`,
+                                            onClick: () => setActiveTab('active')
+                                        }, `Active Orders (${activeOrdersCount})`),
+                                        React.createElement('button', {
+                                            className: `tab-button ${activeTab === 'closed' ? 'active' : ''}`,
+                                            onClick: () => setActiveTab('closed')
+                                        }, `Closed Orders (${closedOrdersCount})`)
+                                    ),
+                                    // Status pills
+                                    activeTab === 'active' && data.orderCounts && (
+                                        React.createElement('div', { className: 'flex items-center gap-3' },
+                                            (() => {
+                                                const diff = data.orderCounts.buyVolume - data.orderCounts.sellVolume;
+                                                const absDiff = Math.abs(diff);
+                                                if (absDiff < 0.01) {
+                                                    return React.createElement('div', { className: 'status-pill bg-yellow-100 text-yellow-800 border border-yellow-200' },
+                                                        'Neutral (0.00)'
+                                                    );
+                                                } else if (diff > 0) {
+                                                    return React.createElement('div', { className: 'status-pill bg-green-100 text-green-800 border border-green-200' },
+                                                        `Comprado (${absDiff.toFixed(2)})`
+                                                    );
+                                                } else {
+                                                    return React.createElement('div', { className: 'status-pill bg-red-100 text-red-800 border border-red-200' },
+                                                        `Vendido (${absDiff.toFixed(2)})`
+                                                    );
+                                                }
+                                            })(),
+                                            React.createElement('div', { className: 'status-pill bg-green-50 text-green-700 border border-green-200' },
+                                                `Buys: ${data.orderCounts.buyVolume.toFixed(2)}`
+                                            ),
+                                            React.createElement('div', { className: 'status-pill bg-red-50 text-red-700 border border-red-200' },
+                                                `Sells: ${data.orderCounts.sellVolume.toFixed(2)}`
+                                            ),
+                                            React.createElement('div', { className: 'status-pill bg-blue-50 text-blue-700 border border-blue-200' },
+                                                `Total Open: ${(data.orderCounts.buyVolume + data.orderCounts.sellVolume).toFixed(2)}`
+                                            )
+                                        )
+                                    ),
+                                    activeTab === 'closed' && (
+                                        React.createElement('div', { className: 'flex items-center gap-3' },
+                                            (() => {
+                                                const closedTotals = calculateClosedOrderTotals(closedOrders);
+                                                return React.createElement(React.Fragment, null,
+                                                    React.createElement('div', { className: 'status-pill bg-green-50 text-green-700 border border-green-200' },
+                                                        `Closed Buys: ${closedTotals.buyVolume.toFixed(2)}`
+                                                    ),
+                                                    React.createElement('div', { className: 'status-pill bg-red-50 text-red-700 border border-red-200' },
+                                                        `Closed Sells: ${closedTotals.sellVolume.toFixed(2)}`
+                                                    ),
+                                                    React.createElement('div', { className: 'status-pill bg-blue-50 text-blue-700 border border-blue-200' },
+                                                        `Total Closed: ${(closedTotals.buyVolume + closedTotals.sellVolume).toFixed(2)}`
+                                                    )
+                                                );
+                                            })()
+                                        )
+                                    )
+                                ),
+                                React.createElement(DateFilter, {
+                                    onFilterChange: handleDateFilterChange,
+                                    initialStartDate: dateFilter.start,
+                                    initialEndDate: dateFilter.end
+                                })
+                            ),
+                            activeTab === 'active' && (
+                                React.createElement(Table, {
+                                    data: activeOrders,
+                                    columns: columns,
+                                    tabName: 'Active Orders',
+                                    selectedAccount: selectedAccount
+                                })
+                            ),
+                            activeTab === 'closed' && (
+                                React.createElement(Table, {
+                                    data: allTradeHistory,
+                                    columns: closedOrderColumns,
+                                    tabName: 'Closed Orders',
+                                    selectedAccount: selectedAccount
+                                })
+                            )
+                        )
+                    ) : mainTab === 'logs' ? (
+                        React.createElement(React.Fragment, null,
+                            React.createElement('div', { className: 'mb-2 account-buttons-container' },
+                                React.createElement('div', { className: 'flex gap-2 flex-wrap' },
+                                    React.createElement('button', {
+                                        className: `account-button ${selectedAccount === '174225' ? 'active' : ''}`,
+                                        onClick: () => handleAccountChange('174225')
+                                    }, '174225'),
+                                    React.createElement('button', {
+                                        className: `account-button ${selectedAccount === '3028177' ? 'active' : ''}`,
+                                        onClick: () => handleAccountChange('3028177')
+                                    }, '3028177'),
+                                    React.createElement('button', {
+                                        className: `account-button ${selectedAccount === '3028235' ? 'active' : ''}`,
+                                        onClick: () => handleAccountChange('3028235')
+                                    }, '3028235'),
+                                    React.createElement('button', {
+                                        className: `account-button ${selectedAccount === '3028450' ? 'active' : ''}`,
+                                        onClick: () => handleAccountChange('3028450')
+                                    }, '3028450'),
+                                    React.createElement('button', {
+                                        className: `account-button ${selectedAccount === '3028761' ? 'active' : ''}`,
+                                        onClick: () => handleAccountChange('3028761')
+                                    }, '3028761'),
+                                    React.createElement('button', {
+                                        className: `account-button ${selectedAccount === '3037813' ? 'active' : ''}`,
+                                        onClick: () => handleAccountChange('3037813')
+                                    }, '3037813'),
+                                    React.createElement('button', {
+                                        className: `account-button ${selectedAccount === '3037814' ? 'active' : ''}`,
+                                        onClick: () => handleAccountChange('3037814')
+                                    }, '3037814'),
+                                    React.createElement('button', {
+                                        className: `account-button ${selectedAccount === '3044621' ? 'active' : ''}`,
+                                        onClick: () => handleAccountChange('3044621')
+                                    }, '3044621'),
+                                    React.createElement('button', {
+                                        className: `account-button ${selectedAccount === '3047423' ? 'active' : ''}`,
+                                        onClick: () => handleAccountChange('3047423')
+                                    }, '3047423'),
+                                    React.createElement('button', {
+                                        className: `account-button ${selectedAccount === '3048221' ? 'active' : ''}`,
+                                        onClick: () => handleAccountChange('3048221')
+                                    }, '3048221'),
+                                    React.createElement('button', {
+                                        className: `account-button ${selectedAccount === '3048222' ? 'active' : ''}`,
+                                        onClick: () => handleAccountChange('3048222')
+                                    }, '3048222'),
+                                    React.createElement('button', {
+                                        className: `account-button ${selectedAccount === '3048699' ? 'active' : ''}`,
+                                        onClick: () => handleAccountChange('3048699')
+                                    }, '3048699'),
+                                    React.createElement('button', {
+                                        className: `account-button ${selectedAccount === '3049696' ? 'active' : ''}`,
+                                        onClick: () => handleAccountChange('3049696')
+                                    }, '3049696')
+                                )
+                            ),
+                            React.createElement(LogsTab, {
+                                selectedAccount: selectedAccount
+                            })
+                        )
+                    ) : mainTab === 'resumo' ? (
+                        React.createElement('div', { className: 'data-card p-6' },
+                            React.createElement('h2', { className: 'text-xl font-semibold mb-4' }, 'Resumo de Contas'),
+                            React.createElement('div', { className: 'mb-4 flex items-center space-x-4' },
+                                React.createElement('label', { className: 'text-sm font-medium text-gray-700' }, 'Starting Balance:'),
+                                React.createElement('input', {
+                                    type: 'number',
+                                    value: startingBalance,
+                                    onChange: handleStartingBalanceChange,
+                                    className: 'border rounded px-2 py-1 w-32',
+                                    min: '0',
+                                    step: '0.01'
+                                }),
+                                React.createElement(DateFilter, {
+                                    onFilterChange: (start, end) => setResumoDateFilter({ start, end }),
+                                    initialStartDate: resumoDateFilter.start,
+                                    initialEndDate: resumoDateFilter.end
+                                })
+                            ),
+                            React.createElement('table', { className: 'min-w-full divide-y divide-gray-200' },
+                                React.createElement('thead', { className: 'bg-gray-50' },
+                                    React.createElement('tr', null,
+                                        React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Account'),
+                                        React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Type'),
+                                        React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Equity'),
+                                        React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Return')
+                                    )
+                                ),
+                                React.createElement('tbody', { className: 'bg-white divide-y divide-gray-200' },
+                                    Object.entries(allAccountsData).map(([account, data]) => {
+                                        const returnPercentage = ((data.equity - startingBalance) / startingBalance * 100).toFixed(2);
+                                        return React.createElement('tr', { key: account },
+                                            React.createElement('td', { className: 'px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900' }, account),
+                                            React.createElement('td', { className: 'px-6 py-4 whitespace-nowrap text-sm text-gray-500' }, data.accountType || 'N/A'),
+                                            React.createElement('td', { className: 'px-6 py-4 whitespace-nowrap text-sm text-gray-500' }, data.equity.toFixed(2)),
+                                            React.createElement('td', { className: `px-6 py-4 whitespace-nowrap text-sm ${returnPercentage >= 0 ? 'text-green-600' : 'text-red-600'}` },
+                                                `${returnPercentage >= 0 ? '+' : ''}${returnPercentage}%`
+                                            )
+                                        );
+                                    })
+                                )
+                            )
+                        )
+                    ) : (
+                        React.createElement(StatisticsTab, {
+                            selectedAccount: selectedAccount,
+                            dateRange: dateFilter
+                        }))
+                );
+            }
+
+
+
+            function exportData(data, filename, format, selectedAccount) {
+                let exportData = data.map(item => {
+                    let row = {};
+                    Object.keys(item).forEach(key => {
+                        row[key] = item[key] != null ? item[key] : 'N/A';
+                    });
+                    return row;
+                });
+
+                if (format === 'csv') {
+                    const headers = Object.keys(exportData[0] || {});
+                    const csvContent = [
+                        headers.join(','),
+                        ...exportData.map(row => headers.map(header => `"${row[header]}"`).join(','))
+                    ].join('\n');
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `${selectedAccount}_${filename}`;
+                    link.click();
+                } else if (format === 'xlsx') {
+                    const ws = XLSX.utils.json_to_sheet(exportData);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+                    XLSX.writeFile(wb, `${selectedAccount}_${filename}`);
+                }
+            }
+
+            ReactDOM.render(React.createElement(App), document.getElementById('root'));
+    </script>
+</body>
+
+</html>
