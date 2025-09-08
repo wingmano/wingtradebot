@@ -55,6 +55,10 @@ export const config = {
 export const DEFAULT_ACCOUNT_NUMBER2 = process.env.DEFAULT_ACCOUNT_NUMBER2 || '';
 export const DEFAULT_ACCOUNT_NUMBER = process.env.DEFAULT_ACCOUNT_NUMBER || '';
 
+// Account configuration
+export const SECONDARY_API_ACCOUNTS = [DEFAULT_ACCOUNT_NUMBER2]; // Accounts that use the secondary API
+export const ALL_MONITORED_ACCOUNTS = [DEFAULT_ACCOUNT_NUMBER, DEFAULT_ACCOUNT_NUMBER2]; // All accounts to monitor
+
 // Environment variable validation
 export function validateEnvironmentVariables(): void {
     const requiredVars = [

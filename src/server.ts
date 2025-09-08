@@ -1,7 +1,7 @@
 import express from "express"
 import bodyParser from "body-parser"
 import path from "path"
-import { config, DEFAULT_ACCOUNT_NUMBER, DEFAULT_ACCOUNT_NUMBER2 } from "./config"
+import { config, DEFAULT_ACCOUNT_NUMBER, DEFAULT_ACCOUNT_NUMBER2, SECONDARY_API_ACCOUNTS, ALL_MONITORED_ACCOUNTS } from "./config"
 import { logger, logTrade, logError, logApp } from "./utils/logger"
 import { webhookLogger } from "./utils/webhookLogger"
 
@@ -1793,7 +1793,7 @@ app.get("/api/status/:loginNumber?", async (req, res) => {
 
     // Determine which API to use based on the account number
     // Accounts in SECONDARY_API_ACCOUNTS should ALWAYS use the secondary API
-    const useSecondaryApi = SECONDARY_API_ACCOUNTS.includes(requestedLoginNumber) || req.query.useSecondaryApi === "true";
+    const useSecondaryApi = SECONDARY_API_ACCOUNTS.includes(requestedLoginNumber || '') || req.query.useSecondaryApi === "true";
 
     // Use the appropriate default account number based on which API we're using
     const defaultAccount = useSecondaryApi ? DEFAULT_ACCOUNT_NUMBER2 : DEFAULT_ACCOUNT_NUMBER;
